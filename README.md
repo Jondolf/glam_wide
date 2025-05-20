@@ -36,7 +36,7 @@ Some planned features include:
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`
   - [x] 2D rotations: `Rot2x4`, `Rot2x8`, `DRot2x2`, `DRot2x4`
   - [x] 3D rotations: `Quatx4`, `Quatx8`, `DQuatx2`, `DQuatx4`
-  - [ ] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
+  - [x] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
   - [ ] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`
   - [ ] 2x3 matrices: `Mat23x4`, `Mat23x8`, `DMat23x2`, `DMat23x4`
   - [ ] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `DSymmetricMat3x2`, `DSymmetricMat3x4`

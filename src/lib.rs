@@ -2,10 +2,12 @@
 
 #![warn(missing_docs)]
 
+mod mat;
 mod quat;
 mod rot2;
 mod vec;
 
+pub use mat::*;
 pub use quat::*;
 pub use rot2::*;
 pub use vec::*;

@@ -1,14 +1,15 @@
 use bevy_math::Rot2;
+use core::ops::*;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DRot2, DVec2x2, DVec2x4};
-use crate::{SimdLaneCount, Vec2x4, Vec2x8};
+use crate::{DMat2x2, DMat2x4, DRot2, DVec2x2, DVec2x4};
+use crate::{Mat2x4, Mat2x8, SimdLaneCount, Vec2x4, Vec2x8};
 
 macro_rules! wide_rot2s {
-    ($(($nonwiden:ident, $n:ident, $vt:ident) => ($nonwidet:ident, $t:ident)),+) => {
+    ($(($nonwiden:ident, $n:ident, $mt:ident, $vt:ident) => ($nonwidet:ident, $t:ident)),+) => {
         $(
         /// A wide counterclockwise 2D rotation.
         #[derive(Clone, Copy, Debug, PartialEq)]
@@ -244,8 +245,14 @@ macro_rules! wide_rot2s {
                 Self::radians(rotation)
             }
         }
+        impl From<$n> for $mt {
+            /// Creates a rotation matrix from a 2D rotation.
+            fn from(rot: $n) -> Self {
+                $mt::from_cols_array(&[rot.cos, -rot.sin, rot.sin, rot.cos])
+            }
+        }
 
-        impl core::ops::Mul for $n {
+        impl Mul for $n {
             type Output = Self;
 
             fn mul(self, rhs: Self) -> Self::Output {
@@ -256,13 +263,13 @@ macro_rules! wide_rot2s {
             }
         }
 
-        impl core::ops::MulAssign for $n {
+        impl MulAssign for $n {
             fn mul_assign(&mut self, rhs: Self) {
                 *self = *self * rhs;
             }
         }
 
-        impl core::ops::Mul<$vt> for $n {
+        impl Mul<$vt> for $n {
             type Output = $vt;
 
             /// Rotates a [`$vt`] by a 2D rotation.
@@ -278,12 +285,12 @@ macro_rules! wide_rot2s {
 }
 
 wide_rot2s!(
-    (Rot2, Rot2x4, Vec2x4) => (f32, f32x4),
-    (Rot2, Rot2x8, Vec2x8) => (f32, f32x8)
+    (Rot2, Rot2x4, Mat2x4, Vec2x4) => (f32, f32x4),
+    (Rot2, Rot2x8, Mat2x8, Vec2x8) => (f32, f32x8)
 );
 
 #[cfg(feature = "f64")]
 wide_rot2s!(
-    (DRot2, DRot2x2, DVec2x2) => (f64, f64x2),
-    (DRot2, DRot2x4, DVec2x4) => (f64, f64x4)
+    (DRot2, DRot2x2, DMat2x2, DVec2x2) => (f64, f64x2),
+    (DRot2, DRot2x4, DMat2x4, DVec2x4) => (f64, f64x4)
 );
