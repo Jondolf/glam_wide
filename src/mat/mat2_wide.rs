@@ -5,8 +5,8 @@ use wide::{f32x4, f32x8};
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DVec2x2, DVec2x4};
-use crate::{Vec2x4, Vec2x8};
+use crate::{DMat3x2, DMat3x4, DVec2x2, DVec2x4};
+use crate::{Mat3x4, Mat3x8, Vec2x4, Vec2x8};
 
 macro_rules! wide_mat2s {
     ($($n:ident => $m3t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
@@ -28,6 +28,9 @@ macro_rules! wide_mat2s {
             /// A 2x2 identity matrix, where all diagonal elements are `1.0`,
             /// and all off-diagonal elements are `0.0`.
             pub const IDENTITY: Self = Self::from_cols($vt::X, $vt::Y);
+
+            /// All NaNs.
+            pub const NAN: Self = Self::from_cols($vt::NAN, $vt::NAN);
 
             #[inline(always)]
             const fn new(m00: $t, m01: $t, m10: $t, m11: $t) -> Self {
@@ -51,6 +54,23 @@ macro_rules! wide_mat2s {
             #[must_use]
             pub const fn from_cols_array(m: &[$t; 4]) -> Self {
                 Self::new(m[0], m[1], m[2], m[3])
+            }
+
+            /// Creates an array storing data in column major order.
+            /// If you require data in row major order `transpose` the matrix first.
+            #[inline]
+            #[must_use]
+            pub const fn to_cols_array(&self) -> [$t; 4] {
+                [self.x_axis.x, self.x_axis.y, self.y_axis.x, self.y_axis.y]
+            }
+
+            /// Creates a 2x2 matrix from a 2D array stored in column major order.
+            /// If your data is in row major order you will need to `transpose` the returned
+            /// matrix.
+            #[inline]
+            #[must_use]
+            pub const fn from_cols_array_2d(m: &[[$t; 2]; 2]) -> Self {
+                Self::from_cols($vt::from_array(m[0]), $vt::from_array(m[1]))
             }
 
             /// Creates a 2D array storing data in column major order.
@@ -86,14 +106,12 @@ macro_rules! wide_mat2s {
                 Self::new(cos, sin, -sin, cos)
             }
 
-            /* TODO
             /// Creates a 2x2 matrix from a 3x3 matrix, discarding the 2nd row and column.
             #[inline]
             #[must_use]
-            pub fn from_mat3(m: Mat3) -> Self {
-                Self::from_cols(m.x_axis.xy(), m.y_axis.xy())
+            pub fn from_mat3(m: $m3t) -> Self {
+                Self::from_cols(m.x_axis.truncate(), m.y_axis.truncate())
             }
-            */
 
             /// Creates a 2x2 matrix from the first 4 values in `slice`.
             ///
@@ -254,7 +272,7 @@ macro_rules! wide_mat2s {
         impl Default for $n {
             #[inline(always)]
             fn default() -> Self {
-                Self::ZERO
+                Self::IDENTITY
             }
         }
 
