@@ -20,7 +20,7 @@ but don't expect stability or long-term support at this stage!
 Some planned features include:
 
 - Double-precision versions of math types
-  - [ ] 2D rotations: `DRot2`
+  - [x] 2D rotations: `DRot2`
 - Rectangular matrices
   - [ ] 2x3 matrices: `Mat23`, `DMat23`
 - Symmetric matrices
@@ -34,7 +34,7 @@ Some planned features include:
 - Wide SIMD types
   - [x] 2D vectors: `Vec2x4`, `Vec2x8`, `DVec2x2`, `DVec2x4`
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`
-  - [ ] 2D rotations: `Rot2x4`, `Rot2x8`, `DRot2x2`, `DRot2x4`
+  - [x] 2D rotations: `Rot2x4`, `Rot2x8`, `DRot2x2`, `DRot2x4`
   - [x] 3D rotations: `Quatx4`, `Quatx8`, `DQuatx2`, `DQuatx4`
   - [ ] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
   - [ ] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`

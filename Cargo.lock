@@ -64,7 +64,11 @@ dependencies = [
 name = "bevy_math_extensions"
 version = "0.1.0"
 dependencies = [
+ "approx",
  "bevy_math",
+ "bevy_math_extensions",
+ "bevy_reflect",
+ "serde",
  "wide",
 ]
 
@@ -108,6 +112,7 @@ dependencies = [
  "foldhash",
  "glam",
  "serde",
+ "smallvec",
  "smol_str",
  "thiserror",
  "uuid",
@@ -260,6 +265,7 @@ version = "0.29.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8babf46d4c1c9d92deac9f7be466f76dfc4482b6452fc5024b5e8daf6ffeb3ee"
 dependencies = [
+ "approx",
  "bytemuck",
  "rand",
  "serde",

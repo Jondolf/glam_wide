@@ -13,8 +13,18 @@ categories = ["game-development", "science", "simulation"]
 
 [features]
 default = ["f64"]
+
 f64 = []
+bevy_reflect = ["dep:bevy_reflect"]
+serialize = ["dep:serde"]
+approx = ["dep:approx", "bevy_math/approx"]
 
 [dependencies]
 bevy_math = "0.16"
+bevy_reflect = { version = "0.16", optional = true }
+serde = { version = "1.0", optional = true }
 wide = "0.7"
+approx = { version = "0.5", optional = true }
+
+[dev-dependencies]
+bevy_math_extensions = { path = "./", features = ["approx"] }

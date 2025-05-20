@@ -56,7 +56,7 @@ macro_rules! quats {
                 }
             }
 
-            /// Creates a new quaternion with all elements set to `q`.
+            /// Creates a new quaternion with all lanes set to `q`.
             #[inline(always)]
             #[must_use]
             pub fn splat(q: $nonwiden) -> Self {

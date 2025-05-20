@@ -52,7 +52,7 @@ macro_rules! vec2s {
                 }
             }
 
-            /// Creates a new vector with all elements set to `v`.
+            /// Creates a new vector with all lanes set to `v`.
             #[inline(always)]
             #[must_use]
             pub fn splat(v: $nonwiden) -> Self {
