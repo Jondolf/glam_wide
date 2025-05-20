@@ -24,10 +24,10 @@ Some planned features include:
 - Rectangular matrices
   - [ ] 2x3 matrices: `Mat23`, `DMat23`
 - Symmetric matrices
-  - [ ] Symmetric 3x3 matrices: `SymmetricMat3`, `SymmetricMat3`, `DSymmetricMat3`, `DSymmetricMat3`
-  - [ ] Symmetric 4x4 matrices: `SymmetricMat4`, `SymmetricMat4`, `DSymmetricMat4`, `DSymmetricMat4`
-  - [ ] Symmetric 5x5 matrices: `SymmetricMat5`, `SymmetricMat5`, `DSymmetricMat5`, `DSymmetricMat5`
-  - [ ] Symmetric 6x6 matrices: `SymmetricMat&`, `SymmetricMat6`, `DSymmetricMat6`, `DSymmetricMat6`
+  - [ ] Symmetric 3x3 matrices: `SymmetricMat3`, `DSymmetricMat3`
+  - [ ] Symmetric 4x4 matrices: `SymmetricMat4`, `DSymmetricMat4`
+  - [ ] Symmetric 5x5 matrices: `SymmetricMat5`, `DSymmetricMat5`
+  - [ ] Symmetric 6x6 matrices: `SymmetricMat&`, `DSymmetricMat6`
 - Eigen decompositions of symmetric matrices (I have these locally already)
   - [ ] 2D: `SymmetricEigen2`
   - [ ] 3D: `SymmetricEigen3`
