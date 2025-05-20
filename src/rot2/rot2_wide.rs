@@ -7,10 +7,10 @@ use wide::{f64x2, f64x4};
 use crate::{DRot2, DVec2x2, DVec2x4};
 use crate::{SimdLaneCount, Vec2x4, Vec2x8};
 
-macro_rules! rot2s {
+macro_rules! wide_rot2s {
     ($(($nonwiden:ident, $n:ident, $vt:ident) => ($nonwidet:ident, $t:ident)),+) => {
         $(
-        /// A counterclockwise 2D rotation.
+        /// A wide counterclockwise 2D rotation.
         #[derive(Clone, Copy, Debug, PartialEq)]
         pub struct $n {
             /// The cosine of the rotation angle in radians.
@@ -277,13 +277,13 @@ macro_rules! rot2s {
     }
 }
 
-rot2s!(
+wide_rot2s!(
     (Rot2, Rot2x4, Vec2x4) => (f32, f32x4),
     (Rot2, Rot2x8, Vec2x8) => (f32, f32x8)
 );
 
 #[cfg(feature = "f64")]
-rot2s!(
+wide_rot2s!(
     (DRot2, DRot2x2, DVec2x2) => (f64, f64x2),
     (DRot2, DRot2x4, DVec2x4) => (f64, f64x4)
 );

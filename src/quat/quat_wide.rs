@@ -7,10 +7,10 @@ use wide::{f32x4, f32x8, f64x2, f64x4};
 
 use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
-use crate::vec3::{DVec3x2, DVec3x4};
+use crate::{DVec3x2, DVec3x4};
 use crate::{Vec3x4, Vec3x8};
 
-macro_rules! quats {
+macro_rules! wide_quats {
     ($(($nonwiden:ident, $n:ident, $vt:ident) => ($nonwidet:ident, $t:ident)),+) => {
         $(
         /// A wide quaternion representing an orientation.
@@ -624,13 +624,13 @@ impl From<[DQuat; 4]> for DQuatx4 {
     }
 }
 
-quats!(
+wide_quats!(
     (Quat, Quatx4, Vec3x4) => (f32, f32x4),
     (Quat, Quatx8, Vec3x8) => (f32, f32x8)
 );
 
 #[cfg(feature = "f64")]
-quats!(
+wide_quats!(
     (DQuat, DQuatx2, DVec3x2) => (f64, f64x2),
     (DQuat, DQuatx4, DVec3x4) => (f64, f64x4)
 );

@@ -2,25 +2,13 @@
 
 #![warn(missing_docs)]
 
-mod drot2;
 mod quat;
 mod rot2;
-mod vec2;
-mod vec3;
+mod vec;
 
-pub use drot2::DRot2;
-#[cfg(feature = "f64")]
-pub use quat::{DQuatx2, DQuatx4};
-pub use quat::{Quatx4, Quatx8};
-#[cfg(feature = "f64")]
-pub use rot2::{DRot2x2, DRot2x4};
-pub use rot2::{Rot2x4, Rot2x8};
-#[cfg(feature = "f64")]
-pub use vec2::{DVec2x2, DVec2x4};
-pub use vec2::{Vec2x4, Vec2x8};
-#[cfg(feature = "f64")]
-pub use vec3::{DVec3x2, DVec3x4};
-pub use vec3::{Vec3x4, Vec3x8};
+pub use quat::*;
+pub use rot2::*;
+pub use vec::*;
 
 pub use wide::*;
 
