@@ -10,7 +10,7 @@ macro_rules! vec2s {
     ($(($nonwiden:ident, $n:ident, $v3t:ident) => ($nonwidet:ident, $t:ident)),+) => {
         $(
         /// A 2-dimensional wide vector.
-        #[derive(Clone, Copy, Debug, Default, PartialEq)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             /// The X component of the vector.

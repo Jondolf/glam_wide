@@ -10,7 +10,7 @@ macro_rules! vec3s {
     ($(($v2t:ident, $nonwiden:ident, $n:ident) => ($nonwidet:ident, $t:ident)),+) => {
         $(
         /// A 3-dimensional wide vector.
-        #[derive(Clone, Copy, Debug, Default, PartialEq)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             /// The X component of the vector.
