@@ -105,11 +105,23 @@ macro_rules! rot2s {
                 Self { sin, cos }
             }
 
-            /// Creates a 2D rotation with all lanes set to `rot`.
-            pub fn splat(rot: $nonwiden) -> Self {
+            /// Creates a 2D rotation with all lanes set to the same sine and cosine values of an angle in radians.
+            ///
+            /// The rotation is only valid if `sin * sin + cos * cos == 1.0`.
+            #[inline]
+            pub fn from_sin_cos_splat(sin: $nonwidet, cos: $nonwidet) -> Self {
                 Self {
-                    sin: $t::splat(rot.sin),
-                    cos: $t::splat(rot.cos),
+                    sin: $t::new([sin; $t::LANES]),
+                    cos: $t::new([cos; $t::LANES]),
+                }
+            }
+
+            /// Creates a 2D rotation with all lanes set to `rot`.
+            #[inline]
+            pub const fn splat(rot: $nonwiden) -> Self {
+                Self {
+                    sin: $t::new([rot.sin; $t::LANES]),
+                    cos: $t::new([rot.cos; $t::LANES]),
                 }
             }
 

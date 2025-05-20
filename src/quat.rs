@@ -5,6 +5,7 @@ use core::iter::{Product, Sum};
 use core::ops::*;
 use wide::{f32x4, f32x8, f64x2, f64x4};
 
+use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
 use crate::vec3::{DVec3x2, DVec3x4};
 use crate::{Vec3x4, Vec3x8};
@@ -32,12 +33,20 @@ macro_rules! quats {
 
         impl $n {
             /// All zeros.
-            pub const ZERO: Self = Self::from_xyzw($t::ZERO, $t::ZERO, $t::ZERO, $t::ZERO);
+            pub const ZERO: Self = Self::from_xyzw_splat(0.0, 0.0, 0.0, 0.0);
 
             /// The identity quaternion. Corresponds to no rotation.
-            pub const IDENTITY: Self = Self::from_xyzw($t::ZERO, $t::ZERO, $t::ZERO, $t::ONE);
+            pub const IDENTITY: Self = Self::from_xyzw_splat(0.0, 0.0, 0.0, 1.0);
+
+            /// All NaNs.
+            pub const NAN: Self = Self::from_xyzw_splat($nonwidet::NAN, $nonwidet::NAN, $nonwidet::NAN, $nonwidet::NAN);
 
             /// Creates a new rotation quaternion.
+            ///
+            /// # Preconditions
+            ///
+            /// This function does not check if the input is normalized, it is up to the user to
+            /// provide normalized input or to normalized the resulting quaternion.
             #[inline(always)]
             #[must_use]
             pub const fn from_xyzw(x: $t, y: $t, z: $t, w: $t) -> Self {
@@ -45,14 +54,19 @@ macro_rules! quats {
             }
 
             /// Creates a new quaternion with all lanes set to the same `x`, `y`, and `z` values.
+            ///
+            /// # Preconditions
+            ///
+            /// This function does not check if the input is normalized, it is up to the user to
+            /// provide normalized input or to normalized the resulting quaternion.
             #[inline(always)]
             #[must_use]
-            pub fn from_xyzw_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet, w: $nonwidet) -> Self {
+            pub const fn from_xyzw_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet, w: $nonwidet) -> Self {
                 Self {
-                    x: $t::splat(x),
-                    y: $t::splat(y),
-                    z: $t::splat(z),
-                    w: $t::splat(w),
+                    x: $t::new([x; $t::LANES]),
+                    y: $t::new([y; $t::LANES]),
+                    z: $t::new([z; $t::LANES]),
+                    w: $t::new([w; $t::LANES]),
                 }
             }
 
@@ -69,6 +83,11 @@ macro_rules! quats {
             }
 
             /// Creates a new rotation quaternion from an array.
+            ///
+            /// # Preconditions
+            ///
+            /// This function does not check if the input is normalized, it is up to the user to
+            /// provide normalized input or to normalized the resulting quaternion.
             #[inline(always)]
             #[must_use]
             pub const fn from_array(arr: [$t; 4]) -> Self {
@@ -83,6 +102,11 @@ macro_rules! quats {
             }
 
             /// Creates a rotation quaternion from the first 4 values in `slice`.
+            ///
+            /// # Preconditions
+            ///
+            /// This function does not check if the input is normalized, it is up to the user to
+            /// provide normalized input or to normalized the resulting quaternion.
             ///
             /// # Panics
             ///

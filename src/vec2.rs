@@ -2,6 +2,7 @@ use bevy_math::{DVec2, Vec2};
 use core::ops::*;
 use wide::{CmpGt, f32x4, f32x8, f64x2, f64x4};
 
+use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
 use crate::vec3::{DVec3x2, DVec3x4};
 use crate::vec3::{Vec3x4, Vec3x8};
@@ -21,16 +22,40 @@ macro_rules! vec2s {
 
         impl $n {
             /// All zeros.
-            pub const ZERO: Self = Self::new($t::ZERO, $t::ZERO);
+            pub const ZERO: Self = Self::new_splat(0.0, 0.0);
 
             /// All ones.
-            pub const ONE: Self = Self::new($t::ONE, $t::ONE);
+            pub const ONE: Self = Self::new_splat(1.0, 1.0);
+
+            /// All negative ones.
+            pub const NEG_ONE: Self = Self::new_splat(-1.0, -1.0);
+
+            /// All `MIN`.
+            pub const MIN: Self = Self::new_splat($nonwidet::MIN, $nonwidet::MIN);
+
+            /// All `MAX`.
+            pub const MAX: Self = Self::new_splat($nonwidet::MAX, $nonwidet::MAX);
+
+            /// All `NAN`.
+            pub const NAN: Self = Self::new_splat($nonwidet::NAN, $nonwidet::NAN);
+
+            /// All `INFINITY`.
+            pub const INFINITY: Self = Self::new_splat($nonwidet::INFINITY, $nonwidet::INFINITY);
+
+            /// All `NEG_INFINITY`.
+            pub const NEG_INFINITY: Self = Self::new_splat($nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY);
 
             /// A unit vector pointing along the positive X axis.
-            pub const X: Self = Self::new($t::ONE, $t::ZERO);
+            pub const X: Self = Self::new_splat(1.0, 0.0);
+
+            /// A unit vector pointing along the negative X axis.
+            pub const NEG_X: Self = Self::new_splat(-1.0, 0.0);
 
             /// A unit vector pointing along the positive Y axis.
-            pub const Y: Self = Self::new($t::ZERO, $t::ONE);
+            pub const Y: Self = Self::new_splat(0.0, 1.0);
+
+            /// A unit vector pointing along the negative Y axis.
+            pub const NEG_Y: Self = Self::new_splat(0.0, -1.0);
 
             /// The unit axes.
             pub const AXES: [Self; 2] = [Self::X, Self::Y];
@@ -45,20 +70,20 @@ macro_rules! vec2s {
             /// Creates a new vector with all lanes set to the same `x` and `y` values.
             #[inline(always)]
             #[must_use]
-            pub fn new_splat(x: $nonwidet, y: $nonwidet) -> Self {
+            pub const fn new_splat(x: $nonwidet, y: $nonwidet) -> Self {
                 Self {
-                    x: $t::splat(x),
-                    y: $t::splat(y),
+                    x: $t::new([x; $t::LANES]),
+                    y: $t::new([y; $t::LANES]),
                 }
             }
 
             /// Creates a new vector with all lanes set to `v`.
             #[inline(always)]
             #[must_use]
-            pub fn splat(v: $nonwiden) -> Self {
+            pub const fn splat(v: $nonwiden) -> Self {
                 Self {
-                    x: $t::splat(v.x),
-                    y: $t::splat(v.y),
+                    x: $t::new([v.x; $t::LANES]),
+                    y: $t::new([v.y; $t::LANES]),
                 }
             }
 
