@@ -76,7 +76,7 @@ macro_rules! wide_vec3s {
             }
 
             /// Creates a new vector with all lanes set to the same `x`, `y`, and `z` values.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn new_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet) -> Self {
                 Self {
@@ -87,7 +87,7 @@ macro_rules! wide_vec3s {
             }
 
             /// Creates a new vector with all lanes set to `v`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn splat(v: $nonwiden) -> Self {
                 Self {
@@ -102,7 +102,7 @@ macro_rules! wide_vec3s {
             /// This is essentially a bitwise blend operation, such that any point where
             /// there is a 1 bit in `mask`, the output will put the bit from `if_true`, while
             /// where there is a 0 bit in `mask`, the output will put the bit from `if_false`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn blend(mask: $t, if_true: Self, if_false: Self) -> Self {
                 Self {
@@ -113,7 +113,7 @@ macro_rules! wide_vec3s {
             }
 
             /// Returns a vector containing each element of `self` modified by a mapping function `f`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn map<F>(self, f: F) -> Self
             where
@@ -123,14 +123,14 @@ macro_rules! wide_vec3s {
             }
 
             /// Creates a new vector from an array.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_array(arr: [$t; 3]) -> Self {
                 Self::new(arr[0], arr[1], arr[2])
             }
 
             /// Returns the vector as an array.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn to_array(self) -> [$t; 3] {
                 [self.x, self.y, self.z]
@@ -141,7 +141,7 @@ macro_rules! wide_vec3s {
             /// # Panics
             ///
             /// Panics if `slice` is less than 3 elements long.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_slice(slice: &[$t]) -> Self {
                 assert!(slice.len() == 3);
@@ -153,48 +153,48 @@ macro_rules! wide_vec3s {
             /// # Panics
             ///
             /// Panics if `slice` is less than 3 elements long.
-            #[inline(always)]
+            #[inline]
             pub fn write_to_slice(self, slice: &mut [$t]) {
                 slice[..3].copy_from_slice(&self.to_array());
             }
 
             /// Creates a 2D vector from the `x` and `y` elements of `self`, discarding `z`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn truncate(self) -> $v2t {
                 $v2t::new(self.x, self.y)
             }
 
             /// Creates a 3D vector from `self` with the given value of `x`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn with_x(self, x: $t) -> Self {
                 Self::new(x, self.y, self.z)
             }
 
             /// Creates a 3D vector from `self` with the given value of `y`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn with_y(self, y: $t) -> Self {
                 Self::new(self.x, y, self.z)
             }
 
             /// Creates a 3D vector from `self` with the given value of `z`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn with_z(self, z: $t) -> Self {
                 Self::new(self.x, self.y, z)
             }
 
             /// Computes the dot product of `self` and `rhs`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn dot(self, rhs: Self) -> $t {
                 self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
             }
 
             /// Returns a vector where every component is the dot product of `self` and `rhs`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn dot_into_vec(self, rhs: Self) -> Self {
                 let dot = self.dot(rhs);
@@ -202,7 +202,7 @@ macro_rules! wide_vec3s {
             }
 
             /// Computes the cross product of `self` and `rhs`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cross(self, rhs: Self) -> Self {
                 Self::new(
@@ -215,7 +215,7 @@ macro_rules! wide_vec3s {
             /// Returns a vector containing the minimum values for each element of `self` and `rhs`.
             ///
             /// In other words this computes `[min(x, rhs.x), min(self.y, rhs.y), ..]`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn min(self, rhs: Self) -> Self {
                 Self::new(self.x.min(rhs.x), self.y.min(rhs.y), self.z.min(rhs.z))
@@ -224,7 +224,7 @@ macro_rules! wide_vec3s {
             /// Returns a vector containing the maximum values for each element of `self` and `rhs`.
             ///
             /// In other words this computes `[max(self.x, rhs.x), max(self.y, rhs.y), ..]`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn max(self, rhs: Self) -> Self {
                 Self::new(self.x.max(rhs.x), self.y.max(rhs.y), self.z.max(rhs.z))
@@ -233,7 +233,7 @@ macro_rules! wide_vec3s {
             /// Component-wise clamping of values.
             ///
             /// Each element in `min` must be less-or-equal to the corresponding element in `max`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn clamp(mut self, min: Self, max: Self) -> Self {
                 self.x = self.x.max(min.x).min(max.x);
@@ -245,7 +245,7 @@ macro_rules! wide_vec3s {
             /// Returns the horizontal minimum of `self`.
             ///
             /// In other words this computes `min(x, y, ..)`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn min_element(self) -> $t {
                 self.x.min(self.y).min(self.z)
@@ -254,28 +254,28 @@ macro_rules! wide_vec3s {
             /// Returns the horizontal maximum of `self`.
             ///
             /// In other words this computes `max(x, y, ..)`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn max_element(self) -> $t {
                 self.x.max(self.y).max(self.z)
             }
 
             /// Returns a vector containing the absolute value of each element of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn abs(self) -> Self {
                 Self::new(self.x.abs(), self.y.abs(), self.z.abs())
             }
 
             /// Returns a vector with signs of `rhs` and the magnitudes of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn copysign(self, rhs: Self) -> Self {
                 Self::new(self.x.copysign(rhs.x), self.y.copysign(rhs.y), self.z.copysign(rhs.z))
             }
 
             /// Computes the length of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length(self) -> $t {
                 self.length_squared().sqrt()
@@ -284,7 +284,7 @@ macro_rules! wide_vec3s {
             /// Computes the squared length of `self`.
             ///
             /// This is faster than `length()` as it avoids a square root operation.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length_squared(self) -> $t {
                 self.dot(self)
@@ -293,21 +293,21 @@ macro_rules! wide_vec3s {
             /// Computes `1.0 / length()`.
             ///
             /// For valid results, `self` must _not_ be of length zero.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length_recip(self) -> $t {
                 $t::ONE / self.length()
             }
 
             /// Computes the Euclidean distance between two points in space.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn distance(self, rhs: Self) -> $t {
                 (self - rhs).length()
             }
 
             /// Compute the squared euclidean distance between two points in space.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn distance_squared(self, rhs: Self) -> $t {
                 (self - rhs).length_squared()
@@ -316,7 +316,7 @@ macro_rules! wide_vec3s {
             /// Returns `self` normalized to length 1.0.
             ///
             /// For valid results, `self` must be finite and _not_ of length zero, nor very close to zero.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn normalize(self) -> Self {
                 self.mul(self.length_recip())
@@ -325,7 +325,7 @@ macro_rules! wide_vec3s {
             /// Returns the vector projection of `self` onto `rhs`.
             ///
             /// `rhs` must be of non-zero length.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn project_onto(self, rhs: Self) -> Self {
                 rhs * self.dot(rhs) / rhs.length_squared()
@@ -337,7 +337,7 @@ macro_rules! wide_vec3s {
             /// `rhs`, in rhs words the result of `self - self.project_onto(rhs)`.
             ///
             /// `rhs` must be of non-zero length.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn reject_from(self, rhs: Self) -> Self {
                 self - self.project_onto(rhs)
@@ -346,7 +346,7 @@ macro_rules! wide_vec3s {
             /// Returns the vector projection of `self` onto `rhs`.
             ///
             /// `rhs` must be normalized.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn project_onto_normalized(self, rhs: Self) -> Self {
                 rhs * self.dot(rhs)
@@ -358,7 +358,7 @@ macro_rules! wide_vec3s {
             /// `rhs`, in rhs words the result of `self - self.project_onto(rhs)`.
             ///
             /// `rhs` must be normalized.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn reject_from_normalized(self, rhs: Self) -> Self {
                 self - self.project_onto_normalized(rhs)
@@ -366,7 +366,7 @@ macro_rules! wide_vec3s {
 
             /// Returns a vector containing the nearest integer to a number for each element of `self`.
             /// Round half-way cases away from `0.0`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn round(self) -> Self {
                 Self::new(self.x.round(), self.y.round(), self.z.round())
@@ -374,7 +374,7 @@ macro_rules! wide_vec3s {
 
             /// Returns a vector containing the largest integer less than or equal to a number for each
             /// element of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn floor(self) -> Self {
                 Self::new(self.x.floor(), self.y.floor(), self.z.floor())
@@ -382,14 +382,14 @@ macro_rules! wide_vec3s {
 
             /// Returns a vector containing the smallest integer greater than or equal to a number for
             /// each element of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn ceil(self) -> Self {
                 Self::new(self.x.ceil(), self.y.ceil(), self.z.ceil())
             }
 
             /// Returns a vector containing the reciprocal `1.0 / n` of each element of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn recip(self) -> Self {
                 Self::new($t::ONE / self.x, $t::ONE / self.y, $t::ONE / self.z)
@@ -400,7 +400,7 @@ macro_rules! wide_vec3s {
             /// When `s` is `0.0`, the result will be equal to `self`.  When `s` is `1.0`, the result
             /// will be equal to `rhs`. When `s` is outside of range `[0, 1]`, the result is linearly
             /// extrapolated.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn lerp(self, rhs: Self, s: $t) -> Self {
                 self * ($t::ONE - s) + rhs * s
@@ -413,7 +413,7 @@ macro_rules! wide_vec3s {
             /// architecture has a dedicated fma CPU instruction. However, this is not always true,
             /// and will be heavily dependant on designing algorithms with specific target hardware in
             /// mind.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn mul_add(self, a: Self, b: Self) -> Self {
                 Self::new(
@@ -427,7 +427,7 @@ macro_rules! wide_vec3s {
             /// `normal`.
             ///
             /// `normal` must be normalized.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn reflect(self, normal: Self) -> Self {
                 self - 2.0 * self.dot(normal) * normal

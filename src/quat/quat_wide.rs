@@ -59,7 +59,7 @@ macro_rules! wide_quats {
             ///
             /// This function does not check if the input is normalized, it is up to the user to
             /// provide normalized input or to normalized the resulting quaternion.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_xyzw_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet, w: $nonwidet) -> Self {
                 Self {
@@ -71,7 +71,7 @@ macro_rules! wide_quats {
             }
 
             /// Creates a new quaternion with all lanes set to `q`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn splat(q: $nonwiden) -> Self {
                 Self {
@@ -88,14 +88,14 @@ macro_rules! wide_quats {
             ///
             /// This function does not check if the input is normalized, it is up to the user to
             /// provide normalized input or to normalized the resulting quaternion.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_array(arr: [$t; 4]) -> Self {
                 Self::from_xyzw(arr[0], arr[1], arr[2], arr[3])
             }
 
             /// Returns the rotation quaternion as an array.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn to_array(self) -> [$t; 4] {
                 [self.x, self.y, self.z, self.w]
@@ -111,7 +111,7 @@ macro_rules! wide_quats {
             /// # Panics
             ///
             /// Panics if `slice` is less than 4 elements long.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_slice(slice: &[$t]) -> Self {
                 assert!(slice.len() == 4);
@@ -123,7 +123,7 @@ macro_rules! wide_quats {
             /// # Panics
             ///
             /// Panics if `slice` is less than 4 elements long.
-            #[inline(always)]
+            #[inline]
             pub fn write_to_slice(self, slice: &mut [$t]) {
                 slice[..4].copy_from_slice(&self.to_array());
             }
@@ -131,7 +131,7 @@ macro_rules! wide_quats {
             /// Creates a quaternion for a normalized rotation `axis` and `angle` (in radians).
             ///
             /// The axis must be a unit vector.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_axis_angle(axis: $vt, angle: $t) -> Self {
                 let half_angle = angle * $t::splat(0.5);
@@ -143,7 +143,7 @@ macro_rules! wide_quats {
             /// Creates a quaternion that rotates `v.length()` radians around `v.normalize()`.
             ///
             /// `v` must not be zero.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_scaled_axis(v: $vt) -> Self {
                 let angle = v.length();
@@ -151,7 +151,7 @@ macro_rules! wide_quats {
             }
 
             /// Creates a quaternion from the `angle` (in radians) around the X axis.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_rotation_x(angle: $t) -> Self {
                 let half_angle = angle * $t::splat(0.5);
@@ -160,7 +160,7 @@ macro_rules! wide_quats {
             }
 
             /// Creates a quaternion from the `angle` (in radians) around the Y axis.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_rotation_y(angle: $t) -> Self {
                 let half_angle = angle * $t::splat(0.5);
@@ -169,7 +169,7 @@ macro_rules! wide_quats {
             }
 
             /// Creates a quaternion from the `angle` (in radians) around the Z axis.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_rotation_z(angle: $t) -> Self {
                 let half_angle = angle * $t::splat(0.5);
@@ -179,7 +179,7 @@ macro_rules! wide_quats {
 
             /// Returns the quaternion conjugate of `self`. For a unit quaternion
             /// the conjugate is also the inverse.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn conjugate(self) -> Self {
                 Self::from_xyzw(-self.x, -self.y, -self.z, self.w)
@@ -190,14 +190,14 @@ macro_rules! wide_quats {
             /// Typically quaternion inverse returns the conjugate of a normalized quaternion.
             /// Because `self` is assumed to already be unit length this method *does not* normalize
             /// before returning the conjugate.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn inverse(self) -> Self {
                 self.conjugate()
             }
 
             /// Computes the length of `self`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length(self) -> $t {
                 self.length_squared().sqrt()
@@ -206,7 +206,7 @@ macro_rules! wide_quats {
             /// Computes the squared length of `self`.
             ///
             /// This is faster than `length()` as it avoids a square root operation.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length_squared(self) -> $t {
                 self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w
@@ -215,21 +215,21 @@ macro_rules! wide_quats {
             /// Computes `1.0 / length()`.
             ///
             /// For valid results, `self` must _not_ be of length zero.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn length_recip(self) -> $t {
                 $t::ONE / self.length()
             }
 
             /// Computes the Euclidean distance between two points in space.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn distance(self, rhs: Self) -> $t {
                 (self - rhs).length()
             }
 
             /// Compute the squared euclidean distance between two points in space.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn distance_squared(self, rhs: Self) -> $t {
                 (self - rhs).length_squared()
@@ -238,7 +238,7 @@ macro_rules! wide_quats {
             /// Returns `self` normalized to length 1.0.
             ///
             /// For valid results, `self` must be finite and _not_ of length zero, nor very close to zero.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn normalize(self) -> Self {
                 let length = self.length();
@@ -252,7 +252,7 @@ macro_rules! wide_quats {
 
             // TODO: A method for rotating multiple vectors at once, reusing intermediate results.
             /// Multiplies a quaternion and a 3D vector, returning the rotated vector.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn mul_vec3(self, rhs: $vt) -> $vt {
                 // TODO: Can we make this faster?
@@ -267,7 +267,7 @@ macro_rules! wide_quats {
             /// represent the combined rotation.
             ///
             /// Note that due to floating point rounding the result may not be perfectly normalized.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn mul_quat(self, rhs: Self) -> Self {
                 let (x0, y0, z0, w0) = self.into();
@@ -282,7 +282,7 @@ macro_rules! wide_quats {
         }
 
         impl Default for $n {
-            #[inline]
+            #[inline(always)]
             fn default() -> Self {
                 Self::IDENTITY
             }

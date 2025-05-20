@@ -50,7 +50,7 @@ macro_rules! wide_mat2s {
             /// Creates a 2x2 matrix from an array stored in column major order.
             /// If your data is stored in row major you will need to `transpose` the returned
             /// matrix.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub const fn from_cols_array(m: &[$t; 4]) -> Self {
                 Self::new(m[0], m[1], m[2], m[3])
