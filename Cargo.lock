@@ -61,6 +61,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_math_extensions"
+version = "0.1.0"
+dependencies = [
+ "bevy_math",
+ "wide",
+]
+
+[[package]]
 name = "bevy_platform"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -255,14 +263,6 @@ dependencies = [
  "bytemuck",
  "rand",
  "serde",
-]
-
-[[package]]
-name = "glam_wide"
-version = "0.1.0"
-dependencies = [
- "bevy_math",
- "wide",
 ]
 
 [[package]]

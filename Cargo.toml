@@ -1,7 +1,15 @@
 [package]
-name = "glam_wide"
+name = "bevy_math_extensions"
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Joona Aalto <jondolf.dev@gmail.com>"]
+description = "Extensions to Bevy's math library."
+documentation = "https://docs.rs/bevy_math_extensions"
+repository = "https://github.com/Jondolf/bevy_math_extensions"
+readme = "README.md"
+keywords = ["gamedev", "math", "simd", "matrix", "vector"]
+categories = ["game-development", "science", "simulation"]
 
 [features]
 default = ["f64"]
