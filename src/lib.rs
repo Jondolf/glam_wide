@@ -1,14 +1,13 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! Wide SIMD types for `glam` and `bevy_math`.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod vec2;
+mod vec3;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+#[cfg(feature = "f64")]
+pub use vec2::{DVec2x2, DVec2x4};
+pub use vec2::{Vec2x4, Vec2x8};
+#[cfg(feature = "f64")]
+pub use vec3::{DVec3x2, DVec3x4};
+pub use vec3::{Vec3x4, Vec3x8};
+
+pub use wide::*;

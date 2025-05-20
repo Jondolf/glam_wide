@@ -3,4 +3,10 @@ name = "glam_wide"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["f64"]
+f64 = []
+
 [dependencies]
+bevy_math = "0.16"
+wide = "0.7"
