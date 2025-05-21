@@ -12,6 +12,7 @@ pub use quat::*;
 pub use rot2::*;
 pub use vec::*;
 
+pub use bevy_math::prelude::*;
 pub use wide::*;
 
 pub(crate) trait FloatExt {

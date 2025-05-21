@@ -24,6 +24,7 @@ Some planned features include:
 - Rectangular matrices
   - [ ] 2x3 matrices: `Mat23`, `DMat23`
 - Symmetric matrices
+  - [x] Symmetric 2x2 matrices: `SymmetricMat2`, `DSymmetricMat2`
   - [x] Symmetric 3x3 matrices: `SymmetricMat3`, `DSymmetricMat3`
   - [ ] Symmetric 4x4 matrices: `SymmetricMat4`, `DSymmetricMat4`
   - [ ] Symmetric 5x5 matrices: `SymmetricMat5`, `DSymmetricMat5`
@@ -39,6 +40,7 @@ Some planned features include:
   - [x] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
   - [x] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`
   - [ ] 2x3 matrices: `Mat23x4`, `Mat23x8`, `DMat23x2`, `DMat23x4`
+  - [x] Symmetric 2x2 matrices: `SymmetricMat2x4`, `SymmetricMat2x8`, `DSymmetricMat2x2`, `DSymmetricMat2x4`
   - [x] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `DSymmetricMat3x2`, `DSymmetricMat3x4`
   - [ ] Symmetric 4x4 matrices: `SymmetricMat4x4`, `SymmetricMat4x8`, `DSymmetricMat4x2`, `DSymmetricMat4x4`
   - [ ] Symmetric 5x5 matrices: `SymmetricMat5x4`, `SymmetricMat5x8`, `DSymmetricMat5x2`, `DSymmetricMat5x4`
