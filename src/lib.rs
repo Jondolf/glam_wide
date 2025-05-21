@@ -14,31 +14,68 @@ pub use vec::*;
 
 pub use wide::*;
 
+pub(crate) trait FloatExt {
+    const ZERO: Self;
+    const ONE: Self;
+}
+
+impl FloatExt for f32 {
+    const ZERO: Self = 0.0;
+    const ONE: Self = 1.0;
+}
+
+impl FloatExt for f64 {
+    const ZERO: Self = 0.0;
+    const ONE: Self = 1.0;
+}
+
+/// An extension trait for wide floating-point SIMD types.
+pub trait SimdFloatExt {
+    /// Not a Number (NaN).
+    const NAN: Self;
+}
+
+macro_rules! impl_simd_const_ext {
+    ($(($t:ident, $n:ident, $lanes:expr),)+) => {
+        $(impl SimdFloatExt for $n {
+            const NAN: Self = Self::new([$t::NAN; $lanes]);
+        })+
+    };
+}
+
+impl_simd_const_ext! {
+    (f32, f32x4, 4),
+    (f32, f32x8, 8),
+    (f64, f64x2, 2),
+    (f64, f64x4, 4),
+}
+
 pub(crate) trait SimdLaneCount {
     /// The number of lanes in the SIMD type.
     const LANES: usize;
 }
 
+macro_rules! impl_simd_lane_count_scalar {
+    ($($n:ident,)+) => {
+        $(impl SimdLaneCount for $n {
+            const LANES: usize = 1;
+        })+
+    };
+}
+
 macro_rules! impl_simd_lane_count {
-    ($(($ty:ty, $lanes:expr),)+) => {
-        $(impl SimdLaneCount for $ty {
+    ($(($n:ident, $lanes:expr),)+) => {
+        $(impl SimdLaneCount for $n {
             const LANES: usize = $lanes;
         })+
     };
 }
 
+// Scalar types
+impl_simd_lane_count_scalar!(f32, f64, i8, i16, i32, i64, u8, u16, u32, u64,);
+
 // Number types
 impl_simd_lane_count! {
-    (f32, 1),
-    (f64, 1),
-    (i8, 1),
-    (i16, 1),
-    (i32, 1),
-    (i64, 1),
-    (u8, 1),
-    (u16, 1),
-    (u32, 1),
-    (u64, 1),
     (f32x4, 4),
     (f32x8, 8),
     (f64x2, 2),

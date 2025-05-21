@@ -140,9 +140,9 @@ macro_rules! wide_mat3s {
             }
 
             /// Creates a 3x3 matrix with its diagonal set to `diagonal` and all other entries set to `0.0`.
-            #[doc(alias = "scale")]
             #[inline]
             #[must_use]
+            #[doc(alias = "scale")]
             pub const fn from_diagonal(diagonal: $vt) -> Self {
                 Self::new(
                     diagonal.x, $t::ZERO, $t::ZERO, $t::ZERO, diagonal.y, $t::ZERO, $t::ZERO, $t::ZERO, diagonal.z,
