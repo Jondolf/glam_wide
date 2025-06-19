@@ -195,6 +195,20 @@ macro_rules! symmetric_mat3s {
                 $nonsymmetricn::from_cols_array(&self.to_cols_array())
             }
 
+            /// Creates a new symmetric 3x3 matrix from the outer product `v * v^T`.
+            #[inline(always)]
+            #[must_use]
+            pub fn from_outer_product(v: $vt) -> Self {
+                Self::new(
+                    v.x * v.x,
+                    v.x * v.y,
+                    v.x * v.z,
+                    v.y * v.y,
+                    v.y * v.z,
+                    v.z * v.z,
+                )
+            }
+
             /// Returns the matrix column for the given `index`.
             ///
             /// # Panics

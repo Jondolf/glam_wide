@@ -9,10 +9,12 @@ use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{
-    DMat3x2, DMat3x4, DSymmetricMat3, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2, DVec3x4,
+    DMat3Ext, DMat3x2, DMat3x4, DSymmetricMat3, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2,
+    DVec3x4,
 };
 use crate::{
-    FloatExt, Mat3x4, Mat3x8, SymmetricMat3, SymmetricMat3x4, SymmetricMat3x8, Vec3x4, Vec3x8,
+    FloatExt, Mat3Ext, Mat3x4, Mat3x8, SymmetricMat3, SymmetricMat3x4, SymmetricMat3x8, Vec3x4,
+    Vec3x8,
 };
 
 macro_rules! symmetric_mat6s {
@@ -75,7 +77,7 @@ macro_rules! symmetric_mat6s {
                 $symmetricm3t::NAN,
             );
 
-            /// Creates a new symmetric 3x3 matrix from its bottom left triangle, including diagonal elements.
+            /// Creates a new symmetric 6x6 matrix from its bottom left triangle, including diagonal elements.
             ///
             /// The matrix is represented as:
             ///
@@ -91,6 +93,17 @@ macro_rules! symmetric_mat6s {
                 d: $symmetricm3t,
             ) -> Self {
                 Self { a, b, d }
+            }
+
+            /// Creates a new symmetric 6x6 matrix from the outer product `[v1, v2] * [v1, v2]^T`.
+            #[inline]
+            #[must_use]
+            pub fn from_outer_product(v1: $v3t, v2:$v3t) -> Self {
+                Self::new(
+                    $symmetricm3t::from_outer_product(v1),
+                    $m3t::from_outer_product(v1, v2),
+                    $symmetricm3t::from_outer_product(v2),
+                )
             }
 
             /// Takes the absolute value of each element in `self`.
@@ -124,6 +137,8 @@ macro_rules! symmetric_mat6s {
             /// Solves `self * [x1, x2] = [rhs1, rhs2]` for `x1` and `x2` using the LDLT decomposition.
             ///
             /// `self` must be a positive semidefinite matrix.
+            #[inline]
+            #[must_use]
             pub fn ldlt_solve(&self, rhs1: $v3t, rhs2: $v3t) -> ($v3t, $v3t) {
                 let (a, b, d) = (self.a, self.b, self.d);
 

@@ -312,6 +312,17 @@ macro_rules! wide_mat3s {
                 Self::from_cols(m.x_axis.extend($t::ZERO), m.y_axis.extend($t::ZERO), $vt::Z)
             }
 
+            /// Creates a new 3x3 matrix from the outer product `v1 * v2^T`.
+            #[inline]
+            #[must_use]
+            pub fn from_outer_product(v1: $vt, v2: $vt) -> Self {
+                Self::new(
+                    v1.x * v2.x, v1.x * v2.y, v1.x * v2.z,
+                    v1.y * v2.x, v1.y * v2.y, v1.y * v2.z,
+                    v1.z * v2.x, v1.z * v2.y, v1.z * v2.z,
+                )
+            }
+
             /// Creates a 3x3 matrix from the first 9 values in `slice`.
             ///
             /// # Panics
