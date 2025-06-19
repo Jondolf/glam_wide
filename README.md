@@ -28,7 +28,7 @@ Some planned features include:
   - [x] Symmetric 3x3 matrices: `SymmetricMat3`, `DSymmetricMat3`
   - [ ] Symmetric 4x4 matrices: `SymmetricMat4`, `DSymmetricMat4`
   - [ ] Symmetric 5x5 matrices: `SymmetricMat5`, `DSymmetricMat5`
-  - [ ] Symmetric 6x6 matrices: `SymmetricMat6`, `DSymmetricMat6`
+  - [x] Symmetric 6x6 matrices: `SymmetricMat6`, `DSymmetricMat6`
 - Eigen decompositions of symmetric matrices (I have these locally already)
   - [ ] 2D: `SymmetricEigen2`
   - [ ] 3D: `SymmetricEigen3`
@@ -44,7 +44,7 @@ Some planned features include:
   - [x] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `DSymmetricMat3x2`, `DSymmetricMat3x4`
   - [ ] Symmetric 4x4 matrices: `SymmetricMat4x4`, `SymmetricMat4x8`, `DSymmetricMat4x2`, `DSymmetricMat4x4`
   - [ ] Symmetric 5x5 matrices: `SymmetricMat5x4`, `SymmetricMat5x8`, `DSymmetricMat5x2`, `DSymmetricMat5x4`
-  - [ ] Symmetric 6x6 matrices: `SymmetricMat&x4`, `SymmetricMat6x8`, `DSymmetricMat6x2`, `DSymmetricMat6x4`
+  - [x] Symmetric 6x6 matrices: `SymmetricMat6x4`, `SymmetricMat6x8`, `DSymmetricMat6x2`, `DSymmetricMat6x4`
 
 These features are primarily driven by my needs for physics simulation.
 More features may be added over time as requirements change.

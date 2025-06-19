@@ -758,7 +758,7 @@ macro_rules! impl_wide_symmetric_mat3s {
                 }
             }
 
-            /// Creates a new wide symmetric 3x3 matrix with all lanes set to `m`.
+            /// Creates a new symmetric 3x3 matrix with all lanes set to `m`.
             #[inline]
             #[must_use]
             pub const fn splat(m: $nonwiden) -> Self {

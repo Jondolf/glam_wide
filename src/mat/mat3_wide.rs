@@ -1,3 +1,6 @@
+#[cfg(feature = "f64")]
+use bevy_math::DMat3;
+use bevy_math::Mat3;
 use core::iter::{Product, Sum};
 use core::ops::*;
 use wide::{f32x4, f32x8};
@@ -9,7 +12,7 @@ use crate::{DMat2x2, DMat2x4, DQuatx2, DQuatx4, DVec2x2, DVec2x4, DVec3x2, DVec3
 use crate::{Mat2x4, Mat2x8, Quatx4, Quatx8, Vec2x4, Vec2x8, Vec3x4, Vec3x8};
 
 macro_rules! wide_mat3s {
-    ($($n:ident => $qt:ident, $m2t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
+    ($($n:ident => $nonwiden:ident, $qt:ident, $m2t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
         $(
         /// A wide 3x3 column major matrix.
         ///
@@ -73,6 +76,17 @@ macro_rules! wide_mat3s {
                     x_axis: $vt::new(m00, m01, m02),
                     y_axis: $vt::new(m10, m11, m12),
                     z_axis: $vt::new(m20, m21, m22),
+                }
+            }
+
+            /// Creates a new 3x3 matrix with all lanes set to `m`.
+            #[inline]
+            #[must_use]
+            pub const fn splat(m: $nonwiden) -> Self {
+                Self {
+                    x_axis: $vt::splat(m.x_axis),
+                    y_axis: $vt::splat(m.y_axis),
+                    z_axis: $vt::splat(m.z_axis),
                 }
             }
 
@@ -712,12 +726,12 @@ macro_rules! wide_mat3s {
 }
 
 wide_mat3s!(
-    Mat3x4 => Quatx4, Mat2x4, Vec2x4, Vec3x4, f32x4,
-    Mat3x8 => Quatx8, Mat2x8, Vec2x8, Vec3x8, f32x8
+    Mat3x4 => Mat3, Quatx4, Mat2x4, Vec2x4, Vec3x4, f32x4,
+    Mat3x8 => Mat3, Quatx8, Mat2x8, Vec2x8, Vec3x8, f32x8
 );
 
 #[cfg(feature = "f64")]
 wide_mat3s!(
-    DMat3x2 => DQuatx2, DMat2x2, DVec2x2, DVec3x2, f64x2,
-    DMat3x4 => DQuatx4, DMat2x4, DVec2x4, DVec3x4, f64x4
+    DMat3x2 => DMat3, DQuatx2, DMat2x2, DVec2x2, DVec3x2, f64x2,
+    DMat3x4 => DMat3, DQuatx4, DMat2x4, DVec2x4, DVec3x4, f64x4
 );
