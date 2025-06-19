@@ -11,6 +11,9 @@ use wide::{f64x2, f64x4};
 use crate::{DMat2x2, DMat2x4, DVec2x2, DVec2x4};
 use crate::{FloatExt, Mat2x4, Mat2x8, SimdFloatExt, SimdLaneCount, Vec2x4, Vec2x8};
 
+// TODO: For the non-wide `SymmetricMat2` and `DSymmetricMat2` types, many operations are often
+//       slower than the non-symmetric versions, because Glam uses horizontal SIMD for them.
+//       Could we also use SIMD for these methods, or would that just have more overhead?
 macro_rules! symmetric_mat2s {
     ($($n:ident => $nonsymmetricn:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
         $(
