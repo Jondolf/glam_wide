@@ -168,7 +168,7 @@ macro_rules! symmetric_mat3s {
             #[must_use]
             #[doc(alias = "scale")]
             pub const fn from_diagonal(diagonal: $vt) -> Self {
-                Self::new(diagonal.x, $t::ZERO, diagonal.y, $t::ZERO, $t::ZERO, diagonal.z)
+                Self::new(diagonal.x, $t::ZERO, $t::ZERO, diagonal.y, $t::ZERO, diagonal.z)
             }
 
             /// Creates a symmetric 3x3 matrix from a 3x3 matrix.
@@ -262,21 +262,21 @@ macro_rules! symmetric_mat3s {
             #[must_use]
             pub fn inverse(&self) -> Self {
                 let m00 = self.m11 * self.m22 - self.m12 * self.m12;
-                let m10 = self.m12 * self.m02 - self.m22 * self.m01;
-                let m20 = self.m01 * self.m12 - self.m02 * self.m11;
+                let m01 = self.m12 * self.m02 - self.m22 * self.m01;
+                let m02 = self.m01 * self.m12 - self.m02 * self.m11;
 
-                let inverse_determinant = 1.0 / (m00 * self.m00 + m10 * self.m01 + m20 * self.m02);
+                let inverse_determinant = 1.0 / (m00 * self.m00 + m01 * self.m01 + m02 * self.m02);
 
                 let m11 = self.m22 * self.m00 - self.m02 * self.m02;
-                let m21 = self.m02 * self.m01 - self.m00 * self.m12;
+                let m12 = self.m02 * self.m01 - self.m00 * self.m12;
                 let m22 = self.m00 * self.m11 - self.m01 * self.m01;
 
                 Self {
                     m00: m00 * inverse_determinant,
-                    m01: m10 * inverse_determinant,
-                    m02: m20 * inverse_determinant,
+                    m01: m01 * inverse_determinant,
+                    m02: m02 * inverse_determinant,
                     m11: m11 * inverse_determinant,
-                    m12: m21 * inverse_determinant,
+                    m12: m12 * inverse_determinant,
                     m22: m22 * inverse_determinant,
                 }
             }
