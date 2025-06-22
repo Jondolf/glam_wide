@@ -351,6 +351,40 @@ macro_rules! symmetric_mat3s {
                 res
             }
 
+            /// Solves `self * x = rhs` for `x` using the LDLT decomposition.
+            ///
+            /// `self` must be a positive semidefinite matrix.
+            #[inline]
+            #[must_use]
+            pub fn ldlt_solve(&self, rhs: $vt) -> $vt {
+                let d1 = self.m00;
+                let inv_d1 = $t::ONE / d1;
+                let l21 = inv_d1 * self.m01;
+                let l31 = inv_d1 * self.m02;
+                let d2 = self.m11 - l21 * l21 * d1;
+                let inv_d2 = $t::ONE / d2;
+                let l32 = inv_d2 * (self.m12 - l21 * l31 * d1);
+                let d3 = self.m22 - l31 * l31 * d1 - l32 * l32 * d2;
+                let inv_d3 = $t::ONE / d3;
+
+                // Forward substitution: Solve L * y = b
+                let y1 = rhs.x;
+                let y2 = rhs.y - l21 * y1;
+                let y3 = rhs.z - l31 * y1 - l32 * y2;
+
+                // Diagonal: Solve D * z = y
+                let z1 = y1 * inv_d1;
+                let z2 = y2 * inv_d2;
+                let z3 = y3 * inv_d3;
+
+                // Backward substitution: Solve L^T * x = z
+                let x3 = z3;
+                let x2 = z2 - l32 * x3;
+                let x1 = z1 - l21 * x2 - l31 * x3;
+
+                $vt::new(x1, x2, x3)
+            }
+
             /// Multiplies two 3x3 matrices.
             #[inline]
             #[must_use]
@@ -818,3 +852,46 @@ impl_wide_symmetric_mat3s!(
     DSymmetricMat3x2 => DSymmetricMat3, f64x2, f64,
     DSymmetricMat3x4 => DSymmetricMat3, f64x4, f64
 );
+
+#[cfg(test)]
+mod tests {
+    use approx::assert_relative_eq;
+    use bevy_math::Vec3;
+
+    use crate::SymmetricMat3;
+
+    #[test]
+    fn ldlt_solve() {
+        let sym3 = SymmetricMat3::new(4.0, 1.0, 5.0, 0.0, 2.0, 6.0);
+
+        // Known solution x
+        let x = Vec3::new(1.0, 2.0, 3.0);
+
+        // Compute rhs = A * x
+        let rhs = sym3.mul_vec3(x);
+        assert_eq!(rhs, Vec3::new(21.0, 7.0, 27.0));
+
+        // Solve
+        let sol = sym3.ldlt_solve(rhs);
+
+        // Check solution
+        assert_relative_eq!(sol, x, epsilon = 1e-4);
+    }
+
+    #[test]
+    fn ldlt_solve_identity() {
+        let sym3 = SymmetricMat3::IDENTITY;
+
+        // Known solution x
+        let x = Vec3::new(7.0, -3.0, 2.5);
+
+        // Compute rhs = A * x
+        let rhs = sym3.mul_vec3(x);
+
+        // Solve
+        let sol = sym3.ldlt_solve(rhs);
+
+        // Check solution
+        assert_relative_eq!(sol, x, epsilon = 1e-6);
+    }
+}

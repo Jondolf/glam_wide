@@ -480,6 +480,7 @@ mod tests {
     fn ldlt_solve_identity() {
         let sym6 = SymmetricMat6::IDENTITY;
 
+        // Known solution (x1, x2)
         let x1 = Vec3::new(7.0, -3.0, 2.5);
         let x2 = Vec3::new(-1.0, 4.5, 0.0);
 
