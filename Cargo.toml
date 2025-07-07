@@ -16,7 +16,7 @@ default = ["f64"]
 
 f64 = []
 bevy_reflect = ["dep:bevy_reflect", "dep:bevy_reflect_derive"]
-serialize = ["dep:serde", "bevy_math/serde", "wide/serde"]
+serialize = ["dep:serde", "bevy_math/serialize", "wide/serde"]
 approx = ["dep:approx", "bevy_math/approx"]
 
 [dependencies]
