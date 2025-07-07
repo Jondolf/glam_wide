@@ -15,7 +15,7 @@ use crate::{FloatExt, Mat2x4, Mat2x8, SimdFloatExt, SimdLaneCount, Vec2x4, Vec2x
 //       slower than the non-symmetric versions, because Glam uses horizontal SIMD for them.
 //       Could we also use SIMD for these methods, or would that just have more overhead?
 macro_rules! symmetric_mat2s {
-    ($($n:ident => $nonsymmetricn:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
+    ($reflect_trait:path, $($n:ident => $nonsymmetricn:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
         $(
         /// The bottom left triangle (including the diagonal) of a symmetric 2x2 column-major matrix.
         ///
@@ -33,7 +33,7 @@ macro_rules! symmetric_mat2s {
         /// However, the product of two symmetric matrices is *only* symmetric
         /// if the matrices are commutable, meaning that `AB = BA`.
         #[derive(Clone, Copy, Debug)]
-        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
         #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The first element of the first column.
@@ -603,14 +603,25 @@ macro_rules! impl_wide_symmetric_mat2s {
 }
 
 symmetric_mat2s!(
-    SymmetricMat2 => Mat2, Vec2, f32, f32,
+    bevy_reflect::Reflect,
+    SymmetricMat2 => Mat2, Vec2, f32, f32
+);
+
+symmetric_mat2s!(
+    bevy_reflect::TypePath,
     SymmetricMat2x4 => Mat2x4, Vec2x4, f32x4, f32,
     SymmetricMat2x8 => Mat2x8, Vec2x8, f32x8, f32
 );
 
 #[cfg(feature = "f64")]
 symmetric_mat2s!(
-    DSymmetricMat2 => DMat2, DVec2, f64, f64,
+    bevy_reflect::Reflect,
+    DSymmetricMat2 => DMat2, DVec2, f64, f64
+);
+
+#[cfg(feature = "f64")]
+symmetric_mat2s!(
+    bevy_reflect::TypePath,
     DSymmetricMat2x2 => DMat2x2, DVec2x2, f64x2, f64,
     DSymmetricMat2x4 => DMat2x4, DVec2x4, f64x4, f64
 );

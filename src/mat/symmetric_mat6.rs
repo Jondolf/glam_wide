@@ -18,7 +18,7 @@ use crate::{
 };
 
 macro_rules! symmetric_mat6s {
-    ($($n:ident => $symmetricm3t:ident, $m3t:ident, $v3t:ident, $t:ident, $nonwidet:ident),+) => {
+    ($reflect_trait:path, $($n:ident => $symmetricm3t:ident, $m3t:ident, $v3t:ident, $t:ident, $nonwidet:ident),+) => {
         $(
         /// The bottom left triangle (including the diagonal) of a symmetric 6x6 column-major matrix.
         ///
@@ -43,7 +43,7 @@ macro_rules! symmetric_mat6s {
         /// [ B  D  ]
         /// ```
         #[derive(Clone, Copy, Debug)]
-        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
         #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The bottom left triangle of the top left 3x3 block of the matrix,
@@ -419,14 +419,25 @@ macro_rules! impl_wide_symmetric_mat6s {
 }
 
 symmetric_mat6s!(
-    SymmetricMat6 => SymmetricMat3, Mat3, Vec3, f32, f32,
+    bevy_reflect::Reflect,
+    SymmetricMat6 => SymmetricMat3, Mat3, Vec3, f32, f32
+);
+
+symmetric_mat6s!(
+    bevy_reflect::TypePath,
     SymmetricMat6x4 => SymmetricMat3x4, Mat3x4, Vec3x4, f32x4, f32,
     SymmetricMat6x8 => SymmetricMat3x8, Mat3x8, Vec3x8, f32x8, f32
 );
 
 #[cfg(feature = "f64")]
 symmetric_mat6s!(
-    DSymmetricMat6 => DSymmetricMat3, DMat3, DVec3, f64, f64,
+    bevy_reflect::Reflect,
+    DSymmetricMat6 => DSymmetricMat3, DMat3, DVec3, f64, f64
+);
+
+#[cfg(feature = "f64")]
+symmetric_mat6s!(
+    bevy_reflect::TypePath,
     DSymmetricMat6x2 => DSymmetricMat3x2, DMat3x2, DVec3x2, f64x2, f64,
     DSymmetricMat6x4 => DSymmetricMat3x4, DMat3x4, DVec3x4, f64x4, f64
 );
