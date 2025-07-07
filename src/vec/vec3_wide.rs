@@ -242,6 +242,33 @@ macro_rules! wide_vec3s {
                 self
             }
 
+            /// Returns a vector with a length no less than `min` and no more than `max`.
+            #[inline]
+            #[must_use]
+            pub fn clamp_length(self, min: $t, max: $t) -> Self {
+                let length = self.length();
+                let scale = (min / length).max($t::ONE).min(max / length);
+                Self::new(self.x * scale, self.y * scale, self.z * scale)
+            }
+
+            /// Returns a vector with a length no less than `min`.
+            #[inline]
+            #[must_use]
+            pub fn clamp_length_min(self, min: $t) -> Self {
+                let length = self.length();
+                let scale = (min / length).max($t::ONE);
+                Self::new(self.x * scale, self.y * scale, self.z * scale)
+            }
+
+            /// Returns a vector with a length no more than `max`.
+            #[inline]
+            #[must_use]
+            pub fn clamp_length_max(self, max: $t) -> Self {
+                let length = self.length();
+                let scale = (max / length).min($t::ONE);
+                Self::new(self.x * scale, self.y * scale, self.z * scale)
+            }
+
             /// Returns the horizontal minimum of `self`.
             ///
             /// In other words this computes `min(x, y, ..)`.
