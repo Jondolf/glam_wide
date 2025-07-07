@@ -350,6 +350,7 @@ macro_rules! symmetric_mat6s {
 }
 
 macro_rules! impl_scalar_symmetric_mat6s {
+
     ($($n:ident),+) => {
         $(
         impl $n {
@@ -370,6 +371,13 @@ macro_rules! impl_scalar_symmetric_mat6s {
                 self.a.is_nan()
                     || self.b.is_nan()
                     || self.d.is_nan()
+            }
+        }
+
+        impl PartialEq for $n {
+            #[inline]
+            fn eq(&self, other: &Self) -> bool {
+                self.a == other.a && self.b == other.b && self.d == other.d
             }
         }
         )+

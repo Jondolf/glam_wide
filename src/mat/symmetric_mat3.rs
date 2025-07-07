@@ -758,6 +758,18 @@ macro_rules! impl_scalar_symmetric_mat3s {
                     || self.m22.is_nan()
             }
         }
+
+        impl PartialEq for $n {
+            #[inline]
+            fn eq(&self, other: &Self) -> bool {
+                self.m00 == other.m00
+                    && self.m01 == other.m01
+                    && self.m11 == other.m11
+                    && self.m02 == other.m02
+                    && self.m12 == other.m12
+                    && self.m22 == other.m22
+            }
+        }
         )+
     }
 }
