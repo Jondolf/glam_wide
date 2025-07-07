@@ -33,6 +33,8 @@ macro_rules! symmetric_mat2s {
         /// However, the product of two symmetric matrices is *only* symmetric
         /// if the matrices are commutable, meaning that `AB = BA`.
         #[derive(Clone, Copy, Debug)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The first element of the first column.
             pub m00: $t,

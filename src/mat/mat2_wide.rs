@@ -16,6 +16,8 @@ macro_rules! wide_mat2s {
         $(
         /// A wide 2x2 column major matrix.
         #[derive(Clone, Copy, Debug)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The first column of the matrix.

@@ -19,6 +19,8 @@ macro_rules! wide_quats {
         /// floating point "error creep" which can occur when successive quaternion
         /// operations are applied.
         #[derive(Clone, Copy, Debug)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The X component of the quaternion.

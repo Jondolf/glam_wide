@@ -15,14 +15,15 @@ categories = ["game-development", "science", "simulation"]
 default = ["f64"]
 
 f64 = []
-bevy_reflect = ["dep:bevy_reflect"]
-serialize = ["dep:serde"]
+bevy_reflect = ["dep:bevy_reflect", "dep:bevy_reflect_derive"]
+serialize = ["dep:serde", "bevy_math/serde", "wide/serde"]
 approx = ["dep:approx", "bevy_math/approx"]
 
 [dependencies]
 bevy_math = "0.16"
 bevy_reflect = { version = "0.16", optional = true }
-serde = { version = "1.0", optional = true }
+bevy_reflect_derive = { version = "0.16", optional = true }
+serde = { version = "1.0", optional = true, features = ["serde_derive"] }
 wide = "0.7"
 approx = { version = "0.5", optional = true }
 

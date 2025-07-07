@@ -68,6 +68,7 @@ dependencies = [
  "bevy_math",
  "bevy_math_extensions",
  "bevy_reflect",
+ "bevy_reflect_derive",
  "serde",
  "wide",
 ]
@@ -741,6 +742,7 @@ checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
 dependencies = [
  "bytemuck",
  "safe_arch",
+ "serde",
 ]
 
 [[package]]

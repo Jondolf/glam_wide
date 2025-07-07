@@ -6,7 +6,7 @@ use bevy_math::{DMat2, DVec2, FloatExt};
 
 #[cfg(feature = "bevy_reflect")]
 use bevy_reflect::{Reflect, std_traits::ReflectDefault};
-#[cfg(all(feature = "serialize", feature = "bevy_reflect"))]
+#[cfg(all(feature = "bevy_reflect", feature = "serialize"))]
 use bevy_reflect::{ReflectDeserialize, ReflectSerialize};
 
 // TODO: Optionally use libm ops for cross-platform determinism and `no_std` compatibility.
@@ -36,14 +36,14 @@ use bevy_reflect::{ReflectDeserialize, ReflectSerialize};
 /// assert_relative_eq!(rotation1 * DVec2::X, DVec2::Y);
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(
     feature = "bevy_reflect",
     derive(Reflect),
-    reflect(Debug, PartialEq, Default, Clone)
+    reflect(Clone, Debug, Default, PartialEq)
 )]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(
-    all(feature = "serialize", feature = "bevy_reflect"),
+    all(feature = "bevy_reflect", feature = "serialize"),
     reflect(Serialize, Deserialize)
 )]
 #[doc(alias = "rotation", alias = "rotation2d", alias = "rotation_2d")]

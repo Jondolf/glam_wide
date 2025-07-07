@@ -13,6 +13,8 @@ macro_rules! wide_rot2s {
         $(
         /// A wide counterclockwise 2D rotation.
         #[derive(Clone, Copy, Debug, PartialEq)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The cosine of the rotation angle in radians.
             ///

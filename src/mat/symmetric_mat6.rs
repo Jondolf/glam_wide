@@ -43,6 +43,8 @@ macro_rules! symmetric_mat6s {
         /// [ B  D  ]
         /// ```
         #[derive(Clone, Copy, Debug)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The bottom left triangle of the top left 3x3 block of the matrix,
             /// including the diagonal.

@@ -12,6 +12,8 @@ macro_rules! wide_vec3s {
         $(
         /// A 3-dimensional wide vector.
         #[derive(Clone, Copy, Debug, Default)]
+        #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The X component of the vector.
