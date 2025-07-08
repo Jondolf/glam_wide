@@ -8,8 +8,8 @@ use wide::{f32x4, f32x8};
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4};
-use crate::{FloatExt, Mat3x4, Mat3x8, SimdFloatExt, SimdLaneCount, Vec3x4, Vec3x8};
+use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4, MatConversionError};
+use crate::{FloatExt, Mat3x4, Mat3x8, MatExt, SimdFloatExt, SimdLaneCount, Vec3x4, Vec3x8};
 
 macro_rules! symmetric_mat3s {
     ($reflect_trait:path, $($n:ident => $nonsymmetricn:ident, $v2t:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
@@ -700,13 +700,6 @@ macro_rules! symmetric_mat3s {
             }
         }
 
-        impl From<$nonsymmetricn> for $n {
-            #[inline]
-            fn from(mat: $nonsymmetricn) -> Self {
-                Self::from_mat3_unchecked(mat)
-            }
-        }
-
         impl From<$n> for $nonsymmetricn {
             #[inline]
             fn from(mat: $n) -> Self {
@@ -730,9 +723,23 @@ macro_rules! symmetric_mat3s {
 }
 
 macro_rules! impl_scalar_symmetric_mat3s {
-    ($($n:ident),+) => {
+    ($($n:ident => $nonsymmetricn:ident),+) => {
         $(
         impl $n {
+            /// Tries to create a symmetric 3x3 matrix from a 3x3 matrix.
+            ///
+            /// # Errors
+            ///
+            /// Returns a [`MatConversionError`] if the given matrix is not symmetric.
+            #[inline]
+            pub fn try_from_mat3(mat: $nonsymmetricn) -> Result<Self, MatConversionError> {
+                if mat.is_symmetric() {
+                    Ok(Self::from_mat3_unchecked(mat))
+                } else {
+                    Err(MatConversionError::Asymmetric)
+                }
+            }
+
             /// Returns `true` if, and only if, all elements are finite.
             /// If any element is either `NaN` or positive or negative infinity, this will return `false`.
             #[inline]
@@ -756,6 +763,15 @@ macro_rules! impl_scalar_symmetric_mat3s {
                     || self.m02.is_nan()
                     || self.m12.is_nan()
                     || self.m22.is_nan()
+            }
+        }
+
+        impl TryFrom<$nonsymmetricn> for $n {
+            type Error = MatConversionError;
+
+            #[inline]
+            fn try_from(mat: $nonsymmetricn) -> Result<Self, Self::Error> {
+                Self::try_from_mat3(mat)
             }
         }
 
@@ -862,10 +878,10 @@ symmetric_mat3s!(
     DSymmetricMat3x4 => DMat3x4, DVec2x4, DVec3x4, f64x4, f64
 );
 
-impl_scalar_symmetric_mat3s!(SymmetricMat3);
+impl_scalar_symmetric_mat3s!(SymmetricMat3 => Mat3);
 
 #[cfg(feature = "f64")]
-impl_scalar_symmetric_mat3s!(DSymmetricMat3);
+impl_scalar_symmetric_mat3s!(DSymmetricMat3 => DMat3);
 
 impl_wide_symmetric_mat3s!(
     SymmetricMat3x4 => SymmetricMat3, f32x4, f32,

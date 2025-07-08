@@ -9,7 +9,10 @@ use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{DMat2x2, DMat2x4, DVec2x2, DVec2x4};
-use crate::{FloatExt, Mat2x4, Mat2x8, SimdFloatExt, SimdLaneCount, Vec2x4, Vec2x8};
+use crate::{
+    FloatExt, Mat2x4, Mat2x8, MatConversionError, MatExt, SimdFloatExt, SimdLaneCount, Vec2x4,
+    Vec2x8,
+};
 
 // TODO: For the non-wide `SymmetricMat2` and `DSymmetricMat2` types, many operations are often
 //       slower than the non-symmetric versions, because Glam uses horizontal SIMD for them.
@@ -512,13 +515,6 @@ macro_rules! symmetric_mat2s {
             }
         }
 
-        impl From<$nonsymmetricn> for $n {
-            #[inline]
-            fn from(mat: $nonsymmetricn) -> Self {
-                Self::from_mat2_unchecked(mat)
-            }
-        }
-
         impl From<$n> for $nonsymmetricn {
             #[inline]
             fn from(mat: $n) -> Self {
@@ -542,9 +538,23 @@ macro_rules! symmetric_mat2s {
 }
 
 macro_rules! impl_scalar_symmetric_mat2s {
-    ($($n:ident),+) => {
+    ($($n:ident => $nonsymmetricn:ident),+) => {
         $(
         impl $n {
+            /// Tries to create a symmetric 2x2 matrix from a 2x2 matrix.
+            ///
+            /// # Errors
+            ///
+            /// Returns a [`MatConversionError`] if the given matrix is not symmetric.
+            #[inline]
+            pub fn try_from_mat2(mat: $nonsymmetricn) -> Result<Self, MatConversionError> {
+                if mat.is_symmetric() {
+                    Ok(Self::from_mat2_unchecked(mat))
+                } else {
+                    Err(MatConversionError::Asymmetric)
+                }
+            }
+
             /// Returns `true` if, and only if, all elements are finite.
             /// If any element is either `NaN` or positive or negative infinity, this will return `false`.
             #[inline]
@@ -558,6 +568,15 @@ macro_rules! impl_scalar_symmetric_mat2s {
             #[must_use]
             pub fn is_nan(&self) -> bool {
                 self.m00.is_nan() || self.m01.is_nan() || self.m11.is_nan()
+            }
+        }
+
+        impl TryFrom<$nonsymmetricn> for $n {
+            type Error = MatConversionError;
+
+            #[inline]
+            fn try_from(mat: $nonsymmetricn) -> Result<Self, Self::Error> {
+                Self::try_from_mat2(mat)
             }
         }
 
@@ -633,10 +652,10 @@ symmetric_mat2s!(
     DSymmetricMat2x4 => DMat2x4, DVec2x4, f64x4, f64
 );
 
-impl_scalar_symmetric_mat2s!(SymmetricMat2);
+impl_scalar_symmetric_mat2s!(SymmetricMat2 => Mat2);
 
 #[cfg(feature = "f64")]
-impl_scalar_symmetric_mat2s!(DSymmetricMat2);
+impl_scalar_symmetric_mat2s!(DSymmetricMat2 => DMat2);
 
 impl_wide_symmetric_mat2s!(
     SymmetricMat2x4 => SymmetricMat2, f32x4, f32,
