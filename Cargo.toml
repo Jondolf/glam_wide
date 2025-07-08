@@ -15,7 +15,7 @@ categories = ["game-development", "science", "simulation"]
 default = ["f64"]
 
 f64 = []
-bevy_reflect = ["dep:bevy_reflect"]
+bevy_reflect = ["dep:bevy_reflect", "bevy_math/bevy_reflect"]
 serialize = ["dep:serde", "bevy_math/serialize", "wide/serde"]
 approx = ["dep:approx", "bevy_math/approx"]
 

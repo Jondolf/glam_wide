@@ -726,7 +726,7 @@ macro_rules! symmetric_mat3s {
 }
 
 macro_rules! impl_scalar_symmetric_mat3s {
-    ($($n:ident => $nonsymmetricn:ident),+) => {
+    ($($n:ident => $nonsymmetricn:ident, $t:ident),+) => {
         $(
         impl $n {
             /// Tries to create a symmetric 3x3 matrix from a 3x3 matrix.
@@ -787,6 +787,72 @@ macro_rules! impl_scalar_symmetric_mat3s {
                     && self.m02 == other.m02
                     && self.m12 == other.m12
                     && self.m22 == other.m22
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::AbsDiffEq for $n {
+            type Epsilon = $t;
+
+            #[inline]
+            fn default_epsilon() -> Self::Epsilon {
+                $t::EPSILON
+            }
+
+            #[inline]
+            fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+                self.m00.abs_diff_eq(&other.m00, epsilon)
+                    && self.m01.abs_diff_eq(&other.m01, epsilon)
+                    && self.m11.abs_diff_eq(&other.m11, epsilon)
+                    && self.m02.abs_diff_eq(&other.m02, epsilon)
+                    && self.m12.abs_diff_eq(&other.m12, epsilon)
+                    && self.m22.abs_diff_eq(&other.m22, epsilon)
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::RelativeEq for $n {
+            #[inline]
+            fn default_max_relative() -> Self::Epsilon {
+                $t::EPSILON
+            }
+
+            #[inline]
+            fn relative_eq(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_relative: Self::Epsilon,
+            ) -> bool {
+                self.m00.relative_eq(&other.m00, epsilon, max_relative)
+                    && self.m01.relative_eq(&other.m01, epsilon, max_relative)
+                    && self.m11.relative_eq(&other.m11, epsilon, max_relative)
+                    && self.m02.relative_eq(&other.m02, epsilon, max_relative)
+                    && self.m12.relative_eq(&other.m12, epsilon, max_relative)
+                    && self.m22.relative_eq(&other.m22, epsilon, max_relative)
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::UlpsEq for $n {
+            #[inline]
+            fn default_max_ulps() -> u32 {
+                4
+            }
+
+            #[inline]
+            fn ulps_eq(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_ulps: u32,
+            ) -> bool {
+                self.m00.ulps_eq(&other.m00, epsilon, max_ulps)
+                    && self.m01.ulps_eq(&other.m01, epsilon, max_ulps)
+                    && self.m11.ulps_eq(&other.m11, epsilon, max_ulps)
+                    && self.m02.ulps_eq(&other.m02, epsilon, max_ulps)
+                    && self.m12.ulps_eq(&other.m12, epsilon, max_ulps)
+                    && self.m22.ulps_eq(&other.m22, epsilon, max_ulps)
             }
         }
         )+
@@ -881,10 +947,10 @@ symmetric_mat3s!(
     DSymmetricMat3x4 => DMat3x4, DVec2x4, DVec3x4, f64x4, f64
 );
 
-impl_scalar_symmetric_mat3s!(SymmetricMat3 => Mat3);
+impl_scalar_symmetric_mat3s!(SymmetricMat3 => Mat3, f32);
 
 #[cfg(feature = "f64")]
-impl_scalar_symmetric_mat3s!(DSymmetricMat3 => DMat3);
+impl_scalar_symmetric_mat3s!(DSymmetricMat3 => DMat3, f64);
 
 impl_wide_symmetric_mat3s!(
     SymmetricMat3x4 => SymmetricMat3, f32x4, f32,

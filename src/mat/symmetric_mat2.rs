@@ -538,7 +538,7 @@ macro_rules! symmetric_mat2s {
 }
 
 macro_rules! impl_scalar_symmetric_mat2s {
-    ($($n:ident => $nonsymmetricn:ident),+) => {
+    ($($n:ident => $nonsymmetricn:ident, $t:ident),+) => {
         $(
         impl $n {
             /// Tries to create a symmetric 2x2 matrix from a 2x2 matrix.
@@ -584,6 +584,63 @@ macro_rules! impl_scalar_symmetric_mat2s {
             #[inline]
             fn eq(&self, other: &Self) -> bool {
                 self.m00 == other.m00 && self.m01 == other.m01 && self.m11 == other.m11
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::AbsDiffEq for $n {
+            type Epsilon = $t;
+
+            #[inline]
+            fn default_epsilon() -> Self::Epsilon {
+                $t::EPSILON
+            }
+
+            #[inline]
+            fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+                self.m00.abs_diff_eq(&other.m00, epsilon)
+                    && self.m01.abs_diff_eq(&other.m01, epsilon)
+                    && self.m11.abs_diff_eq(&other.m11, epsilon)
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::RelativeEq for $n {
+            #[inline]
+            fn default_max_relative() -> Self::Epsilon {
+                $t::EPSILON
+            }
+
+            #[inline]
+            fn relative_eq(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_relative: Self::Epsilon,
+            ) -> bool {
+                self.m00.relative_eq(&other.m00, epsilon, max_relative)
+                    && self.m01.relative_eq(&other.m01, epsilon, max_relative)
+                    && self.m11.relative_eq(&other.m11, epsilon, max_relative)
+            }
+        }
+
+        #[cfg(feature = "approx")]
+        impl approx::UlpsEq for $n {
+            #[inline]
+            fn default_max_ulps() -> u32 {
+                4
+            }
+
+            #[inline]
+            fn ulps_eq(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_ulps: u32,
+            ) -> bool {
+                self.m00.ulps_eq(&other.m00, epsilon, max_ulps)
+                    && self.m01.ulps_eq(&other.m01, epsilon, max_ulps)
+                    && self.m11.ulps_eq(&other.m11, epsilon, max_ulps)
             }
         }
         )+
@@ -652,10 +709,10 @@ symmetric_mat2s!(
     DSymmetricMat2x4 => DMat2x4, DVec2x4, f64x4, f64
 );
 
-impl_scalar_symmetric_mat2s!(SymmetricMat2 => Mat2);
+impl_scalar_symmetric_mat2s!(SymmetricMat2 => Mat2, f32);
 
 #[cfg(feature = "f64")]
-impl_scalar_symmetric_mat2s!(DSymmetricMat2 => DMat2);
+impl_scalar_symmetric_mat2s!(DSymmetricMat2 => DMat2, f64);
 
 impl_wide_symmetric_mat2s!(
     SymmetricMat2x4 => SymmetricMat2, f32x4, f32,
