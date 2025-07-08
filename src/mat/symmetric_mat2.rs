@@ -148,7 +148,7 @@ macro_rules! symmetric_mat2s {
             /// Creates a symmetric 2x2 matrix from a 2x2 matrix.
             ///
             /// Only the lower left triangle of the matrix is used. No check is performed to ensure
-            /// that the given matrix is truly symmetric matrix.
+            /// that the given matrix is truly symmetric.
             #[inline]
             #[must_use]
             pub fn from_mat2_unchecked(mat: $nonsymmetricn) -> Self {

@@ -179,7 +179,7 @@ macro_rules! symmetric_mat3s {
             /// Creates a symmetric 3x3 matrix from a 3x3 matrix.
             ///
             /// Only the lower left triangle of the matrix is used. No check is performed to ensure
-            /// that the given matrix is truly symmetric matrix.
+            /// that the given matrix is truly symmetric.
             #[inline]
             #[must_use]
             pub const fn from_mat3_unchecked(mat: $nonsymmetricn) -> Self {
