@@ -8,8 +8,11 @@ use wide::{f32x4, f32x8};
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4, MatConversionError};
-use crate::{FloatExt, Mat3x4, Mat3x8, MatExt, SimdFloatExt, SimdLaneCount, Vec3x4, Vec3x8};
+use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4};
+use crate::{
+    FloatExt, Mat3x4, Mat3x8, MatConversionError, MatExt, SimdFloatExt, SimdLaneCount, Vec3x4,
+    Vec3x8,
+};
 
 macro_rules! symmetric_mat3s {
     ($reflect_trait:path, $($n:ident => $nonsymmetricn:ident, $v2t:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
