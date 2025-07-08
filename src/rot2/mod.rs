@@ -1,4 +1,4 @@
-#![cfg(feature = "f64")]
+#[cfg(feature = "f64")]
 mod drot2;
 mod rot2_wide;
 

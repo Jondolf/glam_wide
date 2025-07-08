@@ -101,10 +101,13 @@ impl_simd_lane_count! {
 impl_simd_lane_count! {
     (Vec2x4, 4),
     (Vec2x8, 8),
-    (DVec2x2, 2),
-    (DVec2x4, 4),
     (Vec3x4, 4),
     (Vec3x8, 8),
+}
+#[cfg(feature = "f64")]
+impl_simd_lane_count! {
+    (DVec2x2, 2),
+    (DVec2x4, 4),
     (DVec3x2, 2),
     (DVec3x4, 4),
 }
@@ -113,6 +116,9 @@ impl_simd_lane_count! {
 impl_simd_lane_count! {
     (Rot2x4, 4),
     (Rot2x8, 8),
+}
+#[cfg(feature = "f64")]
+impl_simd_lane_count! {
     (DRot2x2, 2),
     (DRot2x4, 4),
 }
@@ -121,6 +127,9 @@ impl_simd_lane_count! {
 impl_simd_lane_count! {
     (Quatx4, 4),
     (Quatx8, 8),
+}
+#[cfg(feature = "f64")]
+impl_simd_lane_count! {
     (DQuatx2, 2),
     (DQuatx4, 4),
 }

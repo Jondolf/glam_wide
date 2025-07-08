@@ -29,9 +29,6 @@ Some planned features include:
   - [ ] Symmetric 4x4 matrices: `SymmetricMat4`, `DSymmetricMat4`
   - [ ] Symmetric 5x5 matrices: `SymmetricMat5`, `DSymmetricMat5`
   - [x] Symmetric 6x6 matrices: `SymmetricMat6`, `DSymmetricMat6`
-- Eigen decompositions of symmetric matrices (I have these locally already)
-  - [ ] 2D: `SymmetricEigen2`
-  - [ ] 3D: `SymmetricEigen3`
 - Wide SIMD types
   - [x] 2D vectors: `Vec2x4`, `Vec2x8`, `DVec2x2`, `DVec2x4`
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`
