@@ -1,18 +1,19 @@
-#[cfg(feature = "f64")]
-use bevy_math::{DMat2, DVec2};
-use bevy_math::{Mat2, Vec2};
 use core::iter::Sum;
 use core::ops::*;
+#[cfg(feature = "f64")]
+use glam::{DMat2, DVec2};
+#[cfg(feature = "f32")]
+use glam::{Mat2, Vec2};
+use glam_matrix_extensions::SquareMatExt;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{DMat2x2, DMat2x4, DVec2x2, DVec2x4};
-use crate::{
-    FloatExt, Mat2x4, Mat2x8, MatConversionError, MatExt, SimdFloatExt, SimdLaneCount, Vec2x4,
-    Vec2x8,
-};
+use crate::{FloatExt, MatConversionError, SimdFloatExt, SimdLaneCount};
+#[cfg(feature = "f32")]
+use crate::{Mat2x4, Mat2x8, Vec2x4, Vec2x8};
 
 // TODO: For the non-wide `SymmetricMat2` and `DSymmetricMat2` types, many operations are often
 //       slower than the non-symmetric versions, because Glam uses horizontal SIMD for them.
@@ -37,7 +38,7 @@ macro_rules! symmetric_mat2s {
         /// if the matrices are commutable, meaning that `AB = BA`.
         #[derive(Clone, Copy, Debug)]
         #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The first element of the first column.
             pub m00: $t,
@@ -685,11 +686,13 @@ macro_rules! impl_wide_symmetric_mat2s {
     }
 }
 
+#[cfg(feature = "f32")]
 symmetric_mat2s!(
     bevy_reflect::Reflect,
     SymmetricMat2 => Mat2, Vec2, f32, f32
 );
 
+#[cfg(feature = "f32")]
 symmetric_mat2s!(
     bevy_reflect::TypePath,
     SymmetricMat2x4 => Mat2x4, Vec2x4, f32x4, f32,
@@ -709,11 +712,13 @@ symmetric_mat2s!(
     DSymmetricMat2x4 => DMat2x4, DVec2x4, f64x4, f64
 );
 
+#[cfg(feature = "f32")]
 impl_scalar_symmetric_mat2s!(SymmetricMat2 => Mat2, f32);
 
 #[cfg(feature = "f64")]
 impl_scalar_symmetric_mat2s!(DSymmetricMat2 => DMat2, f64);
 
+#[cfg(feature = "f32")]
 impl_wide_symmetric_mat2s!(
     SymmetricMat2x4 => SymmetricMat2, f32x4, f32,
     SymmetricMat2x8 => SymmetricMat2, f32x8, f32

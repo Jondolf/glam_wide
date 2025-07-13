@@ -1,13 +1,15 @@
-#[cfg(feature = "f64")]
-use bevy_math::DQuat;
-use bevy_math::Quat;
 use core::iter::{Product, Sum};
 use core::ops::*;
+#[cfg(feature = "f64")]
+use glam::DQuat;
+#[cfg(feature = "f32")]
+use glam::Quat;
 use wide::{f32x4, f32x8, f64x2, f64x4};
 
 use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
 use crate::{DVec3x2, DVec3x4};
+#[cfg(feature = "f32")]
 use crate::{Vec3x4, Vec3x8};
 
 macro_rules! wide_quats {
@@ -20,7 +22,7 @@ macro_rules! wide_quats {
         /// operations are applied.
         #[derive(Clone, Copy, Debug)]
         #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The X component of the quaternion.
@@ -496,6 +498,7 @@ macro_rules! wide_quats {
     };
 }
 
+#[cfg(feature = "f32")]
 impl From<Quatx4> for [Quat; 4] {
     #[inline]
     fn from(v: Quatx4) -> Self {
@@ -512,6 +515,7 @@ impl From<Quatx4> for [Quat; 4] {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<[Quat; 4]> for Quatx4 {
     #[inline]
     fn from(vecs: [Quat; 4]) -> Self {
@@ -524,6 +528,7 @@ impl From<[Quat; 4]> for Quatx4 {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<Quatx8> for [Quat; 8] {
     #[inline]
     fn from(v: Quatx8) -> Self {
@@ -544,6 +549,7 @@ impl From<Quatx8> for [Quat; 8] {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<[Quat; 8]> for Quatx8 {
     #[inline]
     fn from(vecs: [Quat; 8]) -> Self {
@@ -626,6 +632,7 @@ impl From<[DQuat; 4]> for DQuatx4 {
     }
 }
 
+#[cfg(feature = "f32")]
 wide_quats!(
     (Quat, Quatx4, Vec3x4) => (f32, f32x4),
     (Quat, Quatx8, Vec3x8) => (f32, f32x8)

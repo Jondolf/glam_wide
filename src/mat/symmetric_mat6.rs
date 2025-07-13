@@ -1,21 +1,21 @@
-#[cfg(feature = "f64")]
-use bevy_math::{DMat3, DVec3};
-use bevy_math::{Mat3, Vec3};
 use core::iter::Sum;
 use core::ops::*;
+#[cfg(feature = "f64")]
+use glam::{DMat3, DVec3};
+#[cfg(feature = "f32")]
+use glam::{Mat3, Vec3};
+use glam_matrix_extensions::SquareMatExt;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
+use crate::FloatExt;
 #[cfg(feature = "f64")]
 use crate::{
-    DMat3Ext, DMat3x2, DMat3x4, DSymmetricMat3, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2,
-    DVec3x4,
+    DMat3x2, DMat3x4, DSymmetricMat3, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2, DVec3x4,
 };
-use crate::{
-    FloatExt, Mat3Ext, Mat3x4, Mat3x8, SymmetricMat3, SymmetricMat3x4, SymmetricMat3x8, Vec3x4,
-    Vec3x8,
-};
+#[cfg(feature = "f32")]
+use crate::{Mat3x4, Mat3x8, SymmetricMat3, SymmetricMat3x4, SymmetricMat3x8, Vec3x4, Vec3x8};
 
 macro_rules! symmetric_mat6s {
     ($reflect_trait:path, $($n:ident => $symmetricm3t:ident, $m3t:ident, $v3t:ident, $t:ident, $nonwidet:ident),+) => {
@@ -44,7 +44,7 @@ macro_rules! symmetric_mat6s {
         /// ```
         #[derive(Clone, Copy, Debug)]
         #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The bottom left triangle of the top left 3x3 block of the matrix,
             /// including the diagonal.
@@ -482,11 +482,13 @@ macro_rules! impl_wide_symmetric_mat6s {
     }
 }
 
+#[cfg(feature = "f32")]
 symmetric_mat6s!(
     bevy_reflect::Reflect,
     SymmetricMat6 => SymmetricMat3, Mat3, Vec3, f32, f32
 );
 
+#[cfg(feature = "f32")]
 symmetric_mat6s!(
     bevy_reflect::TypePath,
     SymmetricMat6x4 => SymmetricMat3x4, Mat3x4, Vec3x4, f32x4, f32,
@@ -506,11 +508,13 @@ symmetric_mat6s!(
     DSymmetricMat6x4 => DSymmetricMat3x4, DMat3x4, DVec3x4, f64x4, f64
 );
 
+#[cfg(feature = "f32")]
 impl_scalar_symmetric_mat6s!(SymmetricMat6 => f32);
 
 #[cfg(feature = "f64")]
 impl_scalar_symmetric_mat6s!(DSymmetricMat6 => f64);
 
+#[cfg(feature = "f32")]
 impl_wide_symmetric_mat6s!(
     SymmetricMat6x4 => SymmetricMat6, SymmetricMat3x4, Mat3x4, SymmetricMat3, Mat3,
     SymmetricMat6x8 => SymmetricMat6, SymmetricMat3x8, Mat3x8, SymmetricMat3, Mat3
@@ -525,7 +529,7 @@ impl_wide_symmetric_mat6s!(
 #[cfg(test)]
 mod tests {
     use approx::assert_relative_eq;
-    use bevy_math::{Mat3, Vec3};
+    use glam::{Mat3, Vec3};
 
     use crate::{SymmetricMat3, SymmetricMat6};
 

@@ -1,12 +1,13 @@
 // This is just a direct copy of `Rot2`, but with `f64` types.
+// TODO: This should just be in upstream Bevy.
 
 use core::f64::consts::TAU;
 
-use bevy_math::{DMat2, DVec2, FloatExt};
+use glam::{DMat2, DVec2, FloatExt};
 
 #[cfg(feature = "bevy_reflect")]
 use bevy_reflect::{Reflect, std_traits::ReflectDefault};
-#[cfg(all(feature = "bevy_reflect", feature = "serialize"))]
+#[cfg(all(feature = "bevy_reflect", feature = "serde"))]
 use bevy_reflect::{ReflectDeserialize, ReflectSerialize};
 
 // TODO: Optionally use libm ops for cross-platform determinism and `no_std` compatibility.
@@ -16,7 +17,8 @@ use bevy_reflect::{ReflectDeserialize, ReflectSerialize};
 ///
 /// ```
 /// # use approx::assert_relative_eq;
-/// # use bevy_math::{DRot2, DVec2};
+/// # use glam::DVec2;
+/// # use glam_wide::DRot2;
 /// use std::f64::consts::PI;
 ///
 /// // Create rotations from radians or degrees
@@ -41,9 +43,9 @@ use bevy_reflect::{ReflectDeserialize, ReflectSerialize};
     derive(Reflect),
     reflect(Clone, Debug, Default, PartialEq)
 )]
-#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(
-    all(feature = "bevy_reflect", feature = "serialize"),
+    all(feature = "bevy_reflect", feature = "serde"),
     reflect(Serialize, Deserialize)
 )]
 #[doc(alias = "rotation", alias = "rotation2d", alias = "rotation_2d")]
@@ -110,7 +112,7 @@ impl DRot2 {
     /// # Example
     ///
     /// ```
-    /// # use bevy_math::DRot2;
+    /// # use glam_wide::DRot2;
     /// # use approx::assert_relative_eq;
     /// # use std::f64::consts::{FRAC_PI_2, PI};
     ///
@@ -138,7 +140,7 @@ impl DRot2 {
     /// # Example
     ///
     /// ```
-    /// # use bevy_math::DRot2;
+    /// # use glam_wide::DRot2;
     /// # use approx::assert_relative_eq;
     ///
     /// let rot1 = DRot2::degrees(270.0);
@@ -164,7 +166,7 @@ impl DRot2 {
     /// # Example
     ///
     /// ```
-    /// # use bevy_math::DRot2;
+    /// # use glam_wide::DRot2;
     /// # use approx::assert_relative_eq;
     ///
     /// let rot1 = DRot2::turn_fraction(0.75);
@@ -379,7 +381,7 @@ impl DRot2 {
     /// # Example
     ///
     /// ```
-    /// # use bevy_math::DRot2;
+    /// # use glam_wide::DRot2;
     /// #
     /// let rot1 = DRot2::IDENTITY;
     /// let rot2 = DRot2::degrees(135.0);
@@ -417,7 +419,7 @@ impl DRot2 {
     /// # Example
     ///
     /// ```
-    /// # use bevy_math::DRot2;
+    /// # use glam_wide::DRot2;
     /// #
     /// let rot1 = DRot2::IDENTITY;
     /// let rot2 = DRot2::degrees(135.0);
@@ -515,7 +517,7 @@ mod tests {
     use core::f64::consts::FRAC_PI_2;
 
     use approx::assert_relative_eq;
-    use bevy_math::DVec2;
+    use glam::DVec2;
 
     use crate::DRot2;
 

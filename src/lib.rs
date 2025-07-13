@@ -1,14 +1,16 @@
-//! Wide SIMD types for `glam` and `bevy_math`.
+//! Wide SIMD types for the [`glam`] ecosystem.
 
 #![warn(missing_docs)]
 
 mod mat;
 mod quat;
+#[cfg(feature = "bevy_math")]
 mod rot2;
 mod vec;
 
 pub use mat::*;
 pub use quat::*;
+#[cfg(feature = "bevy_math")]
 pub use rot2::*;
 pub use vec::*;
 
@@ -98,6 +100,7 @@ impl_simd_lane_count! {
 }
 
 // Vector types
+#[cfg(feature = "f32")]
 impl_simd_lane_count! {
     (Vec2x4, 4),
     (Vec2x8, 8),
@@ -113,17 +116,19 @@ impl_simd_lane_count! {
 }
 
 // 2D rotation types
+#[cfg(all(feature = "f32", feature = "bevy_math"))]
 impl_simd_lane_count! {
     (Rot2x4, 4),
     (Rot2x8, 8),
 }
-#[cfg(feature = "f64")]
+#[cfg(all(feature = "f64", feature = "bevy_math"))]
 impl_simd_lane_count! {
     (DRot2x2, 2),
     (DRot2x4, 4),
 }
 
 // Quaternion types
+#[cfg(feature = "f32")]
 impl_simd_lane_count! {
     (Quatx4, 4),
     (Quatx8, 8),

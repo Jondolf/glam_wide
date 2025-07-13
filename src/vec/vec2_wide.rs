@@ -1,10 +1,11 @@
-use bevy_math::{DVec2, Vec2};
 use core::ops::*;
+use glam::{DVec2, Vec2};
 use wide::{CmpGt, f32x4, f32x8, f64x2, f64x4};
 
 use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
 use crate::{DVec3x2, DVec3x4};
+#[cfg(feature = "f32")]
 use crate::{Vec3x4, Vec3x8};
 
 macro_rules! wide_vec2s {
@@ -13,7 +14,7 @@ macro_rules! wide_vec2s {
         /// A 2-dimensional wide vector.
         #[derive(Clone, Copy, Debug, Default)]
         #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The X component of the vector.
@@ -685,6 +686,7 @@ macro_rules! wide_vec2s {
     };
 }
 
+#[cfg(feature = "f32")]
 impl From<Vec2x4> for [Vec2; 4] {
     #[inline]
     fn from(v: Vec2x4) -> Self {
@@ -699,6 +701,7 @@ impl From<Vec2x4> for [Vec2; 4] {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<[Vec2; 4]> for Vec2x4 {
     #[inline]
     fn from(vecs: [Vec2; 4]) -> Self {
@@ -709,6 +712,7 @@ impl From<[Vec2; 4]> for Vec2x4 {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<Vec2x8> for [Vec2; 8] {
     #[inline]
     fn from(v: Vec2x8) -> Self {
@@ -727,6 +731,7 @@ impl From<Vec2x8> for [Vec2; 8] {
     }
 }
 
+#[cfg(feature = "f32")]
 impl From<[Vec2; 8]> for Vec2x8 {
     #[inline]
     fn from(vecs: [Vec2; 8]) -> Self {
@@ -790,6 +795,7 @@ impl From<[DVec2; 4]> for DVec2x4 {
     }
 }
 
+#[cfg(feature = "f32")]
 wide_vec2s!(
     (Vec2, Vec2x4, Vec3x4) => (f32, f32x4),
     (Vec2, Vec2x8, Vec3x8) => (f32, f32x8)

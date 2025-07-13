@@ -1,14 +1,16 @@
-#[cfg(feature = "f64")]
-use bevy_math::DMat2;
-use bevy_math::Mat2;
 use core::iter::{Product, Sum};
 use core::ops::*;
+#[cfg(feature = "f64")]
+use glam::DMat2;
+#[cfg(feature = "f32")]
+use glam::Mat2;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{DMat3x2, DMat3x4, DVec2x2, DVec2x4};
+#[cfg(feature = "f32")]
 use crate::{Mat3x4, Mat3x8, Vec2x4, Vec2x8};
 
 macro_rules! wide_mat2s {
@@ -17,7 +19,7 @@ macro_rules! wide_mat2s {
         /// A wide 2x2 column major matrix.
         #[derive(Clone, Copy, Debug)]
         #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         pub struct $n {
             /// The first column of the matrix.
@@ -437,6 +439,7 @@ macro_rules! wide_mat2s {
     }
 }
 
+#[cfg(feature = "f32")]
 wide_mat2s!(
     Mat2x4 => Mat2, Mat3x4, Vec3x4, Vec2x4, f32x4,
     Mat2x8 => Mat2, Mat3x8, Vec3x8, Vec2x8, f32x8

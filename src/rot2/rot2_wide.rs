@@ -1,11 +1,14 @@
+#[cfg(feature = "f32")]
 use bevy_math::Rot2;
 use core::ops::*;
+#[cfg(feature = "f32")]
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{DMat2x2, DMat2x4, DRot2, DVec2x2, DVec2x4};
+#[cfg(feature = "f32")]
 use crate::{Mat2x4, Mat2x8, SimdLaneCount, Vec2x4, Vec2x8};
 
 macro_rules! wide_rot2s {
@@ -14,7 +17,7 @@ macro_rules! wide_rot2s {
         /// A wide counterclockwise 2D rotation.
         #[derive(Clone, Copy, Debug, PartialEq)]
         #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
-        #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The cosine of the rotation angle in radians.
             ///

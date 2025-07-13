@@ -52,24 +52,13 @@ dependencies = [
  "derive_more",
  "glam",
  "itertools",
+ "libm",
  "rand",
  "rand_distr",
  "serde",
  "smallvec",
  "thiserror",
  "variadics_please",
-]
-
-[[package]]
-name = "bevy_math_extensions"
-version = "0.1.0"
-dependencies = [
- "approx",
- "bevy_math",
- "bevy_math_extensions",
- "bevy_reflect",
- "serde",
- "wide",
 ]
 
 [[package]]
@@ -154,9 +143,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.18.1"
+version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db76d6187cd04dff33004d8e6c9cc4e05cd330500379d2394209271b4aeee"
+checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "bytemuck"
@@ -267,8 +256,34 @@ checksum = "8babf46d4c1c9d92deac9f7be466f76dfc4482b6452fc5024b5e8daf6ffeb3ee"
 dependencies = [
  "approx",
  "bytemuck",
+ "libm",
  "rand",
  "serde",
+]
+
+[[package]]
+name = "glam_matrix_extensions"
+version = "0.1.0"
+source = "git+https://github.com/Jondolf/glam_matrix_extensions#6dd5f4da7dab8440bc5be953894ffe867a0c2364"
+dependencies = [
+ "approx",
+ "glam",
+ "libm",
+ "serde",
+]
+
+[[package]]
+name = "glam_wide"
+version = "0.1.0"
+dependencies = [
+ "approx",
+ "bevy_math",
+ "bevy_reflect",
+ "glam",
+ "glam_matrix_extensions",
+ "glam_wide",
+ "serde",
+ "wide",
 ]
 
 [[package]]
@@ -283,9 +298,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.9.0"
+version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e"
+checksum = "fe4cd85333e22411419a0bcae1297d25e58c9443848b11dc6a86fefe8c78a661"
 dependencies = [
  "equivalent",
  "hashbrown",
@@ -547,9 +562,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.103"
+version = "2.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4307e30089d6fd6aff212f2da3a1f9e32f3223b1f010fb09b7c95f90f3ca1e8"
+checksum = "17b6f705963418cdb9927482fa304bc562ece2fdd4f616084c50b7023b435a40"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -735,13 +750,12 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.32"
+version = "0.7.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41b5576b9a81633f3e8df296ce0063042a73507636cbe956c61133dd7034ab22"
+checksum = "0ce5da8ecb62bcd8ec8b7ea19f69a51275e91299be594ea5cc6ef7819e16cd03"
 dependencies = [
  "bytemuck",
  "safe_arch",
- "serde",
 ]
 
 [[package]]
@@ -810,9 +824,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.7.11"
+version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c7b26e3480b707944fc872477815d29a8e429d2f93a1ce000f5fa84a15cbcd"
+checksum = "f3edebf492c8125044983378ecb5766203ad3b4c2f7a922bd7dd207f6d443e95"
 dependencies = [
  "memchr",
 ]
