@@ -46,8 +46,6 @@ The following features are provided by `glam_wide`, or are being actively worked
   - [x] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
   - [x] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`
   - [ ] 4x4 matrices: `Mat4x4`, `Mat4x8`, `DMat4x2`, `DMat4x4`
-  - [ ] 5x5 matrices: `Mat5x4`, `Mat5x8`, `DMat5x2`, `DMat5x4`
-  - [ ] 6x6 matrices: `Mat6x4`, `Mat6x8`, `DMat6x2`, `DMat6x4`
 - Wide symmetric matrices
   - [x] Symmetric 2x2 matrices: `SymmetricMat2x4`, `SymmetricMat2x8`, `DSymmetricMat2x2`, `DSymmetricMat2x4`
   - [x] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `DSymmetricMat3x2`, `DSymmetricMat3x4`
