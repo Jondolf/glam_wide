@@ -1,25 +1,23 @@
 use core::iter::Sum;
 use core::ops::*;
 #[cfg(feature = "f64")]
-use glam::{DMat3, DVec3};
+use glam_matrix_extensions::DSymmetricMat3;
 #[cfg(feature = "f32")]
-use glam::{Mat3, Vec3, Vec3A};
-use glam_matrix_extensions::SquareMatExt;
-#[cfg(feature = "f32")]
+use glam_matrix_extensions::SymmetricMat3;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4};
-use crate::{FloatExt, MatConversionError, SimdFloatExt, SimdLaneCount};
+use crate::{DMat3x2, DMat3x4, DMat23x2, DMat23x4, DMat32x2, DMat32x4, DVec3x2, DVec3x4};
 #[cfg(feature = "f32")]
-use crate::{Mat3x4, Mat3x8, Vec3x4, Vec3x8};
+use crate::{Mat3x4, Mat3x8, Mat23x4, Mat23x8, Mat32x4, Mat32x8, Vec3x4, Vec3x8};
+use crate::{SimdFloatExt, SimdLaneCount};
 
-macro_rules! symmetric_mat3s {
-    ($reflect_trait:path, $($n:ident => $nonsymmetricn:ident, $v2t:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
+macro_rules! wide_symmetric_mat3s {
+    ($($n:ident => $nonwiden:ident, $nonsymmetricn:ident, $m23t:ident, $m32t:ident, $v2t:ident, $vt:ident, $t:ident, $nonwidet:ident),+) => {
         $(
-        /// The bottom left triangle (including the diagonal) of a symmetric 3x3 column-major matrix.
+        /// The bottom left triangle (including the diagonal) of a wide symmetric 3x3 column-major matrix.
         ///
         /// This is useful for storing a symmetric 3x3 matrix in a more compact form and performing some
         /// matrix operations more efficiently.
@@ -35,7 +33,6 @@ macro_rules! symmetric_mat3s {
         /// However, the product of two symmetric matrices is *only* symmetric
         /// if the matrices are commutable, meaning that `AB = BA`.
         #[derive(Clone, Copy, Debug)]
-        #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The first element of the first column.
@@ -91,6 +88,45 @@ macro_rules! symmetric_mat3s {
                     m11,
                     m12,
                     m22,
+                }
+            }
+
+            /// Creates a new symmetric 3x3 matrix from its bottom left triangle, including diagonal elements,
+            /// with all lanes set to the same values.
+            ///
+            /// The elements are in column-major order `mCR`, where `C` is the column index
+            /// and `R` is the row index.
+            #[inline]
+            #[must_use]
+            pub const fn new_splat(
+                m00: $nonwidet,
+                m01: $nonwidet,
+                m02: $nonwidet,
+                m11: $nonwidet,
+                m12: $nonwidet,
+                m22: $nonwidet,
+            ) -> Self {
+                Self {
+                    m00: $t::new([m00; $t::LANES]),
+                    m01: $t::new([m01; $t::LANES]),
+                    m02: $t::new([m02; $t::LANES]),
+                    m11: $t::new([m11; $t::LANES]),
+                    m12: $t::new([m12; $t::LANES]),
+                    m22: $t::new([m22; $t::LANES]),
+                }
+            }
+
+            /// Creates a new symmetric 3x3 matrix with all lanes set to `m`.
+            #[inline]
+            #[must_use]
+            pub const fn splat(m: $nonwiden) -> Self {
+                Self {
+                    m00: $t::new([m.m00; $t::LANES]),
+                    m01: $t::new([m.m01; $t::LANES]),
+                    m02: $t::new([m.m02; $t::LANES]),
+                    m11: $t::new([m.m11; $t::LANES]),
+                    m12: $t::new([m.m12; $t::LANES]),
+                    m22: $t::new([m.m22; $t::LANES]),
                 }
             }
 
@@ -248,6 +284,13 @@ macro_rules! symmetric_mat3s {
                 }
             }
 
+            /// Returns the diagonal of the matrix.
+            #[inline]
+            #[must_use]
+            pub fn diagonal(&self) -> $vt {
+                $vt::new(self.m00, self.m11, self.m22)
+            }
+
             /// Returns the determinant of `self`.
             #[inline]
             #[must_use]
@@ -302,22 +345,6 @@ macro_rules! symmetric_mat3s {
                 )
             }
 
-            /* TODO
-            /// Computes `(self * other.transpose()).transpose()`.
-            #[inline]
-            #[must_use]
-            pub fn mul_by_transposed_mat2x3(&self, other: Matrix2x3) -> Matrix2x3 {
-                Matrix2x3::new(
-                    self.m00 * other.x_axis.x + self.m01 * other.y_axis.x + self.m02 * other.z_axis.x,
-                    self.m00 * other.x_axis.y + self.m01 * other.y_axis.y + self.m02 * other.z_axis.y,
-                    self.m01 * other.x_axis.x + self.m11 * other.y_axis.x + self.m12 * other.z_axis.x,
-                    self.m01 * other.x_axis.y + self.m11 * other.y_axis.y + self.m12 * other.z_axis.y,
-                    self.m02 * other.x_axis.x + self.m12 * other.y_axis.x + self.m22 * other.z_axis.x,
-                    self.m02 * other.x_axis.y + self.m12 * other.y_axis.y + self.m22 * other.z_axis.y,
-                )
-            }
-            */
-
             /// Computes `skew_symmetric(vec) * self * skew_symmetric(vec).transpose()` for a symmetric matrix `self`.
             #[inline]
             #[must_use]
@@ -365,14 +392,14 @@ macro_rules! symmetric_mat3s {
             #[must_use]
             pub fn ldlt_solve(&self, rhs: $vt) -> $vt {
                 let d1 = self.m00;
-                let inv_d1 = $t::ONE / d1;
+                let inv_d1 = 1.0 / d1;
                 let l21 = inv_d1 * self.m01;
                 let l31 = inv_d1 * self.m02;
                 let d2 = self.m11 - l21 * l21 * d1;
-                let inv_d2 = $t::ONE / d2;
+                let inv_d2 = 1.0 / d2;
                 let l32 = inv_d2 * (self.m12 - l21 * l31 * d1);
                 let d3 = self.m22 - l31 * l31 * d1 - l32 * l32 * d2;
-                let inv_d3 = $t::ONE / d3;
+                let inv_d3 = 1.0 / d3;
 
                 // Forward substitution: Solve L * y = b
                 let y1 = rhs.x;
@@ -396,10 +423,45 @@ macro_rules! symmetric_mat3s {
             #[inline]
             #[must_use]
             pub fn mul_mat3(&self, rhs: &$nonsymmetricn) -> $nonsymmetricn {
-                $nonsymmetricn::from_cols(
-                    self.mul(rhs.x_axis),
-                    self.mul(rhs.y_axis),
-                    self.mul(rhs.z_axis),
+                self.mul(rhs)
+            }
+
+            /// Multiplies `self` by a 3x2 matrix, `self * rhs`.
+            #[inline]
+            #[must_use]
+            pub fn mul_mat32(&self, rhs: &$m32t) -> $m32t {
+                self.mul(rhs)
+            }
+
+            /// Computes `a * transpose(b)`, assuming `a = b * M` for some symmetric matrix `M`.
+            ///
+            /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
+            #[inline]
+            #[must_use]
+            pub fn complete_mat23_sandwich(a: &$m23t, b: &$m23t) -> Self {
+                Self::new(
+                    a.col(0).dot(b.col(0)),
+                    a.col(1).dot(b.col(0)),
+                    a.col(2).dot(b.col(0)),
+                    a.col(1).dot(b.col(1)),
+                    a.col(2).dot(b.col(1)),
+                    a.col(2).dot(b.col(2)),
+                )
+            }
+
+            /// Computes `a * transpose(b)`, assuming `a = b * M` for some symmetric matrix `M`.
+            ///
+            /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
+            #[inline]
+            #[must_use]
+            pub fn complete_mat32_sandwich(a: &$m32t, b: &$m32t) -> Self {
+                Self::new(
+                    a.row(0).dot(b.row(0)),
+                    a.row(1).dot(b.row(0)),
+                    a.row(2).dot(b.row(0)),
+                    a.row(1).dot(b.row(1)),
+                    a.row(2).dot(b.row(1)),
+                    a.row(2).dot(b.row(2)),
                 )
             }
 
@@ -407,61 +469,35 @@ macro_rules! symmetric_mat3s {
             #[inline]
             #[must_use]
             pub fn add_mat3(&self, rhs: &$nonsymmetricn) -> $nonsymmetricn {
-                $nonsymmetricn::from_cols(
-                    self.col(0).add(rhs.x_axis),
-                    self.col(1).add(rhs.y_axis),
-                    self.col(2).add(rhs.z_axis),
-                )
+                self.add(rhs)
             }
 
             /// Subtracts two 3x3 matrices.
             #[inline]
             #[must_use]
             pub fn sub_mat3(&self, rhs: &$nonsymmetricn) -> $nonsymmetricn {
-                $nonsymmetricn::from_cols(
-                    self.col(0).sub(rhs.x_axis),
-                    self.col(1).sub(rhs.y_axis),
-                    self.col(2).sub(rhs.z_axis),
-                )
+                self.sub(rhs)
             }
 
-            /// Multiplies two 3x3 matrices.
+            /// Multiplies two symmetric 3x3 matrices.
             #[inline]
             #[must_use]
             pub fn mul_symmetric_mat3(&self, rhs: &Self) -> $nonsymmetricn {
-                $nonsymmetricn::from_cols(
-                    self.mul_vec3(rhs.col(0)),
-                    self.mul_vec3(rhs.col(1)),
-                    self.mul_vec3(rhs.col(2)),
-                )
+                self.mul(rhs)
             }
 
-            /// Adds two 3x3 matrices.
+            /// Adds two symmetric 3x3 matrices.
             #[inline]
             #[must_use]
             pub fn add_symmetric_mat3(&self, rhs: &Self) -> Self {
-                Self::new(
-                    self.m00 + rhs.m00,
-                    self.m01 + rhs.m01,
-                    self.m02 + rhs.m02,
-                    self.m11 + rhs.m11,
-                    self.m12 + rhs.m12,
-                    self.m22 + rhs.m22,
-                )
+                self.add(rhs)
             }
 
-            /// Subtracts two 3x3 matrices.
+            /// Subtracts two symmetric 3x3 matrices.
             #[inline]
             #[must_use]
             pub fn sub_symmetric_mat3(&self, rhs: &Self) -> Self {
-                Self::new(
-                    self.m00 - rhs.m00,
-                    self.m01 - rhs.m01,
-                    self.m02 - rhs.m02,
-                    self.m11 - rhs.m11,
-                    self.m12 - rhs.m12,
-                    self.m22 - rhs.m22,
-                )
+                self.sub(rhs)
             }
 
             /// Multiplies a 3x3 matrix by a scalar.
@@ -504,14 +540,52 @@ macro_rules! symmetric_mat3s {
             type Output = Self;
             #[inline]
             fn add(self, rhs: Self) -> Self::Output {
-                self.add_symmetric_mat3(&rhs)
+                Self::new(
+                    self.m00 + rhs.m00,
+                    self.m01 + rhs.m01,
+                    self.m02 + rhs.m02,
+                    self.m11 + rhs.m11,
+                    self.m12 + rhs.m12,
+                    self.m22 + rhs.m22,
+                )
+            }
+        }
+
+        impl Add<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                self.add(*rhs)
+            }
+        }
+
+        impl Add<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: Self) -> Self::Output {
+                (*self).add(rhs)
+            }
+        }
+
+        impl Add<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                (*self).add(*rhs)
             }
         }
 
         impl AddAssign for $n {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
-                *self = *self + rhs;
+                *self = self.add(rhs);
+            }
+        }
+
+        impl AddAssign<&Self> for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: &Self) {
+                self.add_assign(*rhs);
             }
         }
 
@@ -519,7 +593,35 @@ macro_rules! symmetric_mat3s {
             type Output = $nonsymmetricn;
             #[inline]
             fn add(self, rhs: $nonsymmetricn) -> Self::Output {
-                self.add_mat3(&rhs)
+                $nonsymmetricn::from_cols(
+                    self.col(0).add(rhs.x_axis),
+                    self.col(1).add(rhs.y_axis),
+                    self.col(2).add(rhs.z_axis),
+                )
+            }
+        }
+
+        impl Add<&$nonsymmetricn> for $n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn add(self, rhs: &$nonsymmetricn) -> Self::Output {
+                self.add(*rhs)
+            }
+        }
+
+        impl Add<$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn add(self, rhs: $nonsymmetricn) -> Self::Output {
+                (*self).add(rhs)
+            }
+        }
+
+        impl Add<&$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn add(self, rhs: &$nonsymmetricn) -> Self::Output {
+                (*self).add(*rhs)
             }
         }
 
@@ -527,7 +629,23 @@ macro_rules! symmetric_mat3s {
             type Output = $nonsymmetricn;
             #[inline]
             fn add(self, rhs: $n) -> Self::Output {
-                rhs.add_mat3(&self)
+                rhs.add(&self)
+            }
+        }
+
+        impl Add<&$n> for $nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn add(self, rhs: &$n) -> Self::Output {
+                self.add(*rhs)
+            }
+        }
+
+        impl Add<&$n> for &$nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn add(self, rhs: &$n) -> Self::Output {
+                (*self).add(*rhs)
             }
         }
 
@@ -538,18 +656,63 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl AddAssign<&$n> for $nonsymmetricn {
+            #[inline]
+            fn add_assign(&mut self, rhs: &$n) {
+                *self = self.add(*rhs);
+            }
+        }
+
         impl Sub for $n {
             type Output = Self;
             #[inline]
             fn sub(self, rhs: Self) -> Self::Output {
-                self.sub_symmetric_mat3(&rhs)
+                Self::new(
+                    self.m00 - rhs.m00,
+                    self.m01 - rhs.m01,
+                    self.m02 - rhs.m02,
+                    self.m11 - rhs.m11,
+                    self.m12 - rhs.m12,
+                    self.m22 - rhs.m22,
+                )
+            }
+        }
+
+        impl Sub<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                self.sub(*rhs)
+            }
+        }
+
+        impl Sub<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: Self) -> Self::Output {
+                (*self).sub(rhs)
+            }
+        }
+
+        impl Sub<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                (*self).sub(*rhs)
             }
         }
 
         impl SubAssign for $n {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
-                *self = *self - rhs;
+                *self = self.sub(rhs);
+            }
+        }
+
+        impl SubAssign<&Self> for $n {
+            #[inline]
+            fn sub_assign(&mut self, rhs: &Self) {
+                self.sub_assign(*rhs);
             }
         }
 
@@ -557,7 +720,35 @@ macro_rules! symmetric_mat3s {
             type Output = $nonsymmetricn;
             #[inline]
             fn sub(self, rhs: $nonsymmetricn) -> Self::Output {
-                self.sub_mat3(&rhs)
+                $nonsymmetricn::from_cols(
+                    self.col(0).sub(rhs.x_axis),
+                    self.col(1).sub(rhs.y_axis),
+                    self.col(2).sub(rhs.z_axis),
+                )
+            }
+        }
+
+        impl Sub<&$nonsymmetricn> for $n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn sub(self, rhs: &$nonsymmetricn) -> Self::Output {
+                self.sub(*rhs)
+            }
+        }
+
+        impl Sub<$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn sub(self, rhs: $nonsymmetricn) -> Self::Output {
+                (*self).sub(rhs)
+            }
+        }
+
+        impl Sub<&$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn sub(self, rhs: &$nonsymmetricn) -> Self::Output {
+                (*self).sub(*rhs)
             }
         }
 
@@ -565,7 +756,23 @@ macro_rules! symmetric_mat3s {
             type Output = $nonsymmetricn;
             #[inline]
             fn sub(self, rhs: $n) -> Self::Output {
-                rhs.sub_mat3(&self)
+                rhs.sub(&self)
+            }
+        }
+
+        impl Sub<&$n> for $nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn sub(self, rhs: &$n) -> Self::Output {
+                self.sub(*rhs)
+            }
+        }
+
+        impl Sub<&$n> for &$nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn sub(self, rhs: &$n) -> Self::Output {
+                (*self).sub(*rhs)
             }
         }
 
@@ -576,21 +783,69 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl SubAssign<&$n> for $nonsymmetricn {
+            #[inline]
+            fn sub_assign(&mut self, rhs: &$n) {
+                *self = self.sub(*rhs);
+            }
+        }
+
         impl Neg for $n {
             type Output = Self;
             #[inline]
             fn neg(self) -> Self::Output {
                 Self::new(
-                    -self.m00, -self.m01, -self.m02, -self.m11, -self.m12, -self.m22,
+                    -self.m00,
+                    -self.m01,
+                    -self.m02,
+                    -self.m11,
+                    -self.m12,
+                    -self.m22,
                 )
             }
         }
 
-        impl Mul<$n> for $n {
+        impl Neg for &$n {
+            type Output = $n;
+            #[inline]
+            fn neg(self) -> Self::Output {
+                (*self).neg()
+            }
+        }
+
+        impl Mul for $n {
             type Output = $nonsymmetricn;
             #[inline]
             fn mul(self, rhs: Self) -> Self::Output {
-                self.mul_symmetric_mat3(&rhs)
+                $nonsymmetricn::from_cols(
+                    self.mul(rhs.col(0)),
+                    self.mul(rhs.col(1)),
+                    self.mul(rhs.col(2)),
+                )
+            }
+        }
+
+        impl Mul<&Self> for $n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: &Self) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<Self> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&Self> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: &Self) -> Self::Output {
+                (*self).mul(*rhs)
             }
         }
 
@@ -598,7 +853,6 @@ macro_rules! symmetric_mat3s {
             type Output = Self;
             #[inline]
             fn mul(self, rhs: $n) -> Self::Output {
-                // TODO: Implement a `mul_symmetric_mat3` method for 3x3 matrices.
                 Self::from_cols_array_2d(&[
                     [
                         self.x_axis.x * rhs.m00 + self.y_axis.x * rhs.m01 + self.z_axis.x * rhs.m02,
@@ -619,6 +873,30 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl Mul<&$n> for $nonsymmetricn {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$n> for &$nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: $n) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$n> for &$nonsymmetricn {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl MulAssign<$n> for $nonsymmetricn {
             #[inline]
             fn mul_assign(&mut self, rhs: $n) {
@@ -626,36 +904,121 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl MulAssign<&$n> for $nonsymmetricn {
+            #[inline]
+            fn mul_assign(&mut self, rhs: &$n) {
+                *self = self.mul(*rhs);
+            }
+        }
+
         impl Mul<$nonsymmetricn> for $n {
             type Output = $nonsymmetricn;
             #[inline]
             fn mul(self, rhs: $nonsymmetricn) -> Self::Output {
-                self.mul_mat3(&rhs)
-            }
-        }
-
-        /* TODO
-        impl Mul<$n> for Matrix2x3 {
-            type Output = Matrix2x3;
-            #[inline]
-            fn mul(self, rhs: $n) -> Self::Output {
-                Matrix2x3::new(
-                    self.x_axis.x * rhs.m00 + self.y_axis.x * rhs.m01 + self.z_axis.x * rhs.m02,
-                    self.x_axis.y * rhs.m00 + self.y_axis.y * rhs.m01 + self.z_axis.y * rhs.m02,
-                    self.x_axis.x * rhs.m01 + self.y_axis.x * rhs.m11 + self.z_axis.x * rhs.m12,
-                    self.x_axis.y * rhs.m01 + self.y_axis.y * rhs.m11 + self.z_axis.y * rhs.m12,
-                    self.x_axis.x * rhs.m02 + self.y_axis.x * rhs.m12 + self.z_axis.x * rhs.m22,
-                    self.x_axis.y * rhs.m02 + self.y_axis.y * rhs.m12 + self.z_axis.y * rhs.m22,
+                $nonsymmetricn::from_cols(
+                    self.mul(rhs.x_axis),
+                    self.mul(rhs.y_axis),
+                    self.mul(rhs.z_axis),
                 )
             }
         }
-        */
+
+        impl Mul<&$nonsymmetricn> for $n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: &$nonsymmetricn) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: $nonsymmetricn) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$nonsymmetricn> for &$n {
+            type Output = $nonsymmetricn;
+            #[inline]
+            fn mul(self, rhs: &$nonsymmetricn) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
+        impl Mul<$m32t> for $n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: $m32t) -> Self::Output {
+                $m32t::from_cols(
+                    $vt::new(
+                        self.row(0).dot(rhs.x_axis),
+                        self.row(1).dot(rhs.x_axis),
+                        self.row(2).dot(rhs.x_axis),
+                    ),
+                    $vt::new(
+                        self.row(0).dot(rhs.y_axis),
+                        self.row(1).dot(rhs.y_axis),
+                        self.row(2).dot(rhs.y_axis),
+                    ),
+                )
+            }
+        }
+
+        impl Mul<&$m32t> for $n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: &$m32t) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$m32t> for &$n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: $m32t) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$m32t> for &$n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: &$m32t) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
 
         impl Mul<$vt> for $n {
             type Output = $vt;
             #[inline]
             fn mul(self, rhs: $vt) -> Self::Output {
                 self.mul_vec3(rhs)
+            }
+        }
+
+        impl Mul<&$vt> for $n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: &$vt) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$vt> for &$n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: $vt) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$vt> for &$n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: &$vt) -> Self::Output {
+                (*self).mul(*rhs)
             }
         }
 
@@ -667,6 +1030,30 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl Mul<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl Mul<$t> for $n {
             type Output = Self;
             #[inline]
@@ -675,10 +1062,41 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl Mul<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl MulAssign<$t> for $n {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                *self = self.mul_scalar(rhs);
+                *self = self.mul(rhs);
+            }
+        }
+
+        impl MulAssign<&$t> for $n {
+            #[inline]
+            fn mul_assign(&mut self, rhs: &$t) {
+                self.mul_assign(*rhs);
             }
         }
 
@@ -690,6 +1108,30 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl Div<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $n) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl Div<$t> for $n {
             type Output = Self;
             #[inline]
@@ -698,17 +1140,48 @@ macro_rules! symmetric_mat3s {
             }
         }
 
+        impl Div<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $t) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl DivAssign<$t> for $n {
             #[inline]
             fn div_assign(&mut self, rhs: $t) {
-                *self = self.div_scalar(rhs);
+                *self = self.div(rhs);
+            }
+        }
+
+        impl DivAssign<&$t> for $n {
+            #[inline]
+            fn div_assign(&mut self, rhs: &$t) {
+                self.div_assign(*rhs);
             }
         }
 
         impl From<$n> for $nonsymmetricn {
             #[inline]
             fn from(mat: $n) -> Self {
-                Self::from_cols(mat.col(0), mat.col(1), mat.col(2))
+                mat.to_mat3()
             }
         }
 
@@ -727,287 +1200,14 @@ macro_rules! symmetric_mat3s {
     }
 }
 
-macro_rules! impl_scalar_symmetric_mat3s {
-    ($($n:ident => $nonsymmetricn:ident, $t:ident),+) => {
-        $(
-        impl $n {
-            /// Tries to create a symmetric 3x3 matrix from a 3x3 matrix.
-            ///
-            /// # Errors
-            ///
-            /// Returns a [`MatConversionError`] if the given matrix is not symmetric.
-            #[inline]
-            pub fn try_from_mat3(mat: $nonsymmetricn) -> Result<Self, MatConversionError> {
-                if mat.is_symmetric() {
-                    Ok(Self::from_mat3_unchecked(mat))
-                } else {
-                    Err(MatConversionError::Asymmetric)
-                }
-            }
-
-            /// Returns `true` if, and only if, all elements are finite.
-            /// If any element is either `NaN` or positive or negative infinity, this will return `false`.
-            #[inline]
-            #[must_use]
-            pub fn is_finite(&self) -> bool {
-                self.m00.is_finite()
-                    && self.m01.is_finite()
-                    && self.m11.is_finite()
-                    && self.m02.is_finite()
-                    && self.m12.is_finite()
-                    && self.m22.is_finite()
-            }
-
-            /// Returns `true` if any elements are `NaN`.
-            #[inline]
-            #[must_use]
-            pub fn is_nan(&self) -> bool {
-                self.m00.is_nan()
-                    || self.m01.is_nan()
-                    || self.m11.is_nan()
-                    || self.m02.is_nan()
-                    || self.m12.is_nan()
-                    || self.m22.is_nan()
-            }
-        }
-
-        impl TryFrom<$nonsymmetricn> for $n {
-            type Error = MatConversionError;
-
-            #[inline]
-            fn try_from(mat: $nonsymmetricn) -> Result<Self, Self::Error> {
-                Self::try_from_mat3(mat)
-            }
-        }
-
-        impl PartialEq for $n {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.m00 == other.m00
-                    && self.m01 == other.m01
-                    && self.m11 == other.m11
-                    && self.m02 == other.m02
-                    && self.m12 == other.m12
-                    && self.m22 == other.m22
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::AbsDiffEq for $n {
-            type Epsilon = $t;
-
-            #[inline]
-            fn default_epsilon() -> Self::Epsilon {
-                $t::EPSILON
-            }
-
-            #[inline]
-            fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                self.m00.abs_diff_eq(&other.m00, epsilon)
-                    && self.m01.abs_diff_eq(&other.m01, epsilon)
-                    && self.m11.abs_diff_eq(&other.m11, epsilon)
-                    && self.m02.abs_diff_eq(&other.m02, epsilon)
-                    && self.m12.abs_diff_eq(&other.m12, epsilon)
-                    && self.m22.abs_diff_eq(&other.m22, epsilon)
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::RelativeEq for $n {
-            #[inline]
-            fn default_max_relative() -> Self::Epsilon {
-                $t::EPSILON
-            }
-
-            #[inline]
-            fn relative_eq(
-                &self,
-                other: &Self,
-                epsilon: Self::Epsilon,
-                max_relative: Self::Epsilon,
-            ) -> bool {
-                self.m00.relative_eq(&other.m00, epsilon, max_relative)
-                    && self.m01.relative_eq(&other.m01, epsilon, max_relative)
-                    && self.m11.relative_eq(&other.m11, epsilon, max_relative)
-                    && self.m02.relative_eq(&other.m02, epsilon, max_relative)
-                    && self.m12.relative_eq(&other.m12, epsilon, max_relative)
-                    && self.m22.relative_eq(&other.m22, epsilon, max_relative)
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::UlpsEq for $n {
-            #[inline]
-            fn default_max_ulps() -> u32 {
-                4
-            }
-
-            #[inline]
-            fn ulps_eq(
-                &self,
-                other: &Self,
-                epsilon: Self::Epsilon,
-                max_ulps: u32,
-            ) -> bool {
-                self.m00.ulps_eq(&other.m00, epsilon, max_ulps)
-                    && self.m01.ulps_eq(&other.m01, epsilon, max_ulps)
-                    && self.m11.ulps_eq(&other.m11, epsilon, max_ulps)
-                    && self.m02.ulps_eq(&other.m02, epsilon, max_ulps)
-                    && self.m12.ulps_eq(&other.m12, epsilon, max_ulps)
-                    && self.m22.ulps_eq(&other.m22, epsilon, max_ulps)
-            }
-        }
-        )+
-    }
-}
-
-impl SymmetricMat3 {
-    /// Transforms a [`Vec3A`].
-    #[inline]
-    #[must_use]
-    pub fn mul_vec3a(&self, rhs: Vec3A) -> Vec3A {
-        self.mul_vec3(rhs.into()).into()
-    }
-}
-
-impl Mul<Vec3A> for SymmetricMat3 {
-    type Output = Vec3A;
-    #[inline]
-    fn mul(self, rhs: Vec3A) -> Self::Output {
-        self.mul_vec3a(rhs)
-    }
-}
-
-macro_rules! impl_wide_symmetric_mat3s {
-    ($($n:ident => $nonwiden:ident, $t:ident, $nonwidet:ident),+) => {
-        $(
-        impl $n {
-            /// Creates a new symmetric 3x3 matrix from its bottom left triangle, including diagonal elements,
-            /// with all lanes set to the same values.
-            ///
-            /// The elements are in column-major order `mCR`, where `C` is the column index
-            /// and `R` is the row index.
-            #[inline]
-            #[must_use]
-            pub const fn new_splat(
-                m00: $nonwidet,
-                m01: $nonwidet,
-                m02: $nonwidet,
-                m11: $nonwidet,
-                m12: $nonwidet,
-                m22: $nonwidet,
-            ) -> Self {
-                Self {
-                    m00: $t::new([m00; $t::LANES]),
-                    m01: $t::new([m01; $t::LANES]),
-                    m02: $t::new([m02; $t::LANES]),
-                    m11: $t::new([m11; $t::LANES]),
-                    m12: $t::new([m12; $t::LANES]),
-                    m22: $t::new([m22; $t::LANES]),
-                }
-            }
-
-            /// Creates a new symmetric 3x3 matrix with all lanes set to `m`.
-            #[inline]
-            #[must_use]
-            pub const fn splat(m: $nonwiden) -> Self {
-                Self {
-                    m00: $t::new([m.m00; $t::LANES]),
-                    m01: $t::new([m.m01; $t::LANES]),
-                    m02: $t::new([m.m02; $t::LANES]),
-                    m11: $t::new([m.m11; $t::LANES]),
-                    m12: $t::new([m.m12; $t::LANES]),
-                    m22: $t::new([m.m22; $t::LANES]),
-                }
-            }
-        }
-        )+
-    }
-}
-
 #[cfg(feature = "f32")]
-symmetric_mat3s!(
-    bevy_reflect::Reflect,
-    SymmetricMat3 => Mat3, Vec2, Vec3, f32, f32
-);
-
-#[cfg(feature = "f32")]
-symmetric_mat3s!(
-    bevy_reflect::TypePath,
-    SymmetricMat3x4 => Mat3x4, Vec2x4, Vec3x4, f32x4, f32,
-    SymmetricMat3x8 => Mat3x8, Vec2x8, Vec3x8, f32x8, f32
+wide_symmetric_mat3s!(
+    SymmetricMat3x4 => SymmetricMat3, Mat3x4, Mat23x4, Mat32x4, Vec2x4, Vec3x4, f32x4, f32,
+    SymmetricMat3x8 => SymmetricMat3, Mat3x8, Mat23x8, Mat32x8, Vec2x8, Vec3x8, f32x8, f32
 );
 
 #[cfg(feature = "f64")]
-symmetric_mat3s!(
-    bevy_reflect::Reflect,
-    DSymmetricMat3 => DMat3, DVec2, DVec3, f64, f64
+wide_symmetric_mat3s!(
+    DSymmetricMat3x2 => DSymmetricMat3, DMat3x2, DMat23x2, DMat32x2, DVec2x2, DVec3x2, f64x2, f64,
+    DSymmetricMat3x4 => DSymmetricMat3, DMat3x4, DMat23x4, DMat32x4, DVec2x4, DVec3x4, f64x4, f64
 );
-
-#[cfg(feature = "f64")]
-symmetric_mat3s!(
-    bevy_reflect::TypePath,
-    DSymmetricMat3x2 => DMat3x2, DVec2x2, DVec3x2, f64x2, f64,
-    DSymmetricMat3x4 => DMat3x4, DVec2x4, DVec3x4, f64x4, f64
-);
-
-#[cfg(feature = "f32")]
-impl_scalar_symmetric_mat3s!(SymmetricMat3 => Mat3, f32);
-
-#[cfg(feature = "f64")]
-impl_scalar_symmetric_mat3s!(DSymmetricMat3 => DMat3, f64);
-
-#[cfg(feature = "f32")]
-impl_wide_symmetric_mat3s!(
-    SymmetricMat3x4 => SymmetricMat3, f32x4, f32,
-    SymmetricMat3x8 => SymmetricMat3, f32x8, f32
-);
-
-#[cfg(feature = "f64")]
-impl_wide_symmetric_mat3s!(
-    DSymmetricMat3x2 => DSymmetricMat3, f64x2, f64,
-    DSymmetricMat3x4 => DSymmetricMat3, f64x4, f64
-);
-
-#[cfg(test)]
-mod tests {
-    use approx::assert_relative_eq;
-    use bevy_math::Vec3;
-
-    use crate::SymmetricMat3;
-
-    #[test]
-    fn ldlt_solve() {
-        let sym3 = SymmetricMat3::new(4.0, 1.0, 5.0, 0.0, 2.0, 6.0);
-
-        // Known solution x
-        let x = Vec3::new(1.0, 2.0, 3.0);
-
-        // Compute rhs = A * x
-        let rhs = sym3.mul_vec3(x);
-        assert_eq!(rhs, Vec3::new(21.0, 7.0, 27.0));
-
-        // Solve
-        let sol = sym3.ldlt_solve(rhs);
-
-        // Check solution
-        assert_relative_eq!(sol, x, epsilon = 1e-4);
-    }
-
-    #[test]
-    fn ldlt_solve_identity() {
-        let sym3 = SymmetricMat3::IDENTITY;
-
-        // Known solution x
-        let x = Vec3::new(7.0, -3.0, 2.5);
-
-        // Compute rhs = A * x
-        let rhs = sym3.mul_vec3(x);
-
-        // Solve
-        let sol = sym3.ldlt_solve(rhs);
-
-        // Check solution
-        assert_relative_eq!(sol, x, epsilon = 1e-6);
-    }
-}

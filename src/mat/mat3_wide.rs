@@ -9,12 +9,18 @@ use wide::{f32x4, f32x8};
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DMat2x2, DMat2x4, DQuatx2, DQuatx4, DVec2x2, DVec2x4, DVec3x2, DVec3x4};
+use crate::{
+    DMat2x2, DMat2x4, DMat23x2, DMat23x4, DMat32x2, DMat32x4, DQuatx2, DQuatx4, DVec2x2, DVec2x4,
+    DVec3x2, DVec3x4,
+};
 #[cfg(feature = "f32")]
-use crate::{Mat2x4, Mat2x8, Quatx4, Quatx8, Vec2x4, Vec2x8, Vec3x4, Vec3x8};
+use crate::{
+    Mat2x4, Mat2x8, Mat23x4, Mat23x8, Mat32x4, Mat32x8, Quatx4, Quatx8, Vec2x4, Vec2x8, Vec3x4,
+    Vec3x8,
+};
 
 macro_rules! wide_mat3s {
-    ($($n:ident => $nonwiden:ident, $qt:ident, $m2t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
+    ($($n:ident => $nonwiden:ident, $symmetricn:ident, $qt:ident, $m2t:ident, $m23t:ident, $m32t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
         $(
         /// A wide 3x3 column major matrix.
         ///
@@ -527,10 +533,63 @@ macro_rules! wide_mat3s {
             #[inline]
             #[must_use]
             pub fn mul_mat3(&self, rhs: &Self) -> Self {
+                self.mul(rhs)
+            }
+
+            /// Multiplies `self` by a 3x2 matrix, `self * rhs`.
+            #[inline]
+            #[must_use]
+            pub fn mul_mat23(&self, rhs: &$m32t) -> $m32t {
+                self.mul(rhs)
+            }
+
+            /// Computes `a * transpose(b)`, assuming `a = b * M` for some symmetric matrix `M`.
+            ///
+            /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
+            #[inline]
+            #[must_use]
+            pub fn complete_mat23_sandwich(a: &$m23t, b: &$m23t) -> Self {
                 Self::from_cols(
-                    self.mul(rhs.x_axis),
-                    self.mul(rhs.y_axis),
-                    self.mul(rhs.z_axis),
+                    $vt::new(
+                        a.x_axis.dot(b.x_axis),
+                        a.y_axis.dot(b.x_axis),
+                        a.z_axis.dot(b.x_axis),
+                    ),
+                    $vt::new(
+                        a.x_axis.dot(b.y_axis),
+                        a.y_axis.dot(b.y_axis),
+                        a.z_axis.dot(b.y_axis),
+                    ),
+                    $vt::new(
+                        a.x_axis.dot(b.z_axis),
+                        a.y_axis.dot(b.z_axis),
+                        a.z_axis.dot(b.z_axis),
+                    ),
+                )
+            }
+
+            /// Computes `a * transpose(b)`, assuming `a = b * M` for some symmetric matrix `M`.
+            ///
+            /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
+            #[inline]
+            #[must_use]
+            pub fn complete_mat32_sandwich(a: &$m32t, b: &$m32t) -> Self {
+                Self::from_cols(
+                    $vt::new(
+                        a.row(0).dot(b.row(0)),
+                        a.row(1).dot(b.row(0)),
+                        a.row(2).dot(b.row(0)),
+                    ),
+                    $vt::new(
+                        a.row(0).dot(b.row(1)),
+                        a.row(1).dot(b.row(1)),
+                        a.row(2).dot(b.row(1)),
+                    ),
+                    $vt::new(
+                        a.row(0).dot(b.row(2)),
+                        a.row(1).dot(b.row(2)),
+                        a.row(2).dot(b.row(2)),
+                    ),
                 )
             }
 
@@ -538,22 +597,14 @@ macro_rules! wide_mat3s {
             #[inline]
             #[must_use]
             pub fn add_mat3(&self, rhs: &Self) -> Self {
-                Self::from_cols(
-                    self.x_axis.add(rhs.x_axis),
-                    self.y_axis.add(rhs.y_axis),
-                    self.z_axis.add(rhs.z_axis),
-                )
+                self.add(rhs)
             }
 
             /// Subtracts two 3x3 matrices.
             #[inline]
             #[must_use]
             pub fn sub_mat3(&self, rhs: &Self) -> Self {
-                Self::from_cols(
-                    self.x_axis.sub(rhs.x_axis),
-                    self.y_axis.sub(rhs.y_axis),
-                    self.z_axis.sub(rhs.z_axis),
-                )
+                self.sub(rhs)
             }
 
             /// Multiplies a 3x3 matrix by a scalar.
@@ -598,14 +649,49 @@ macro_rules! wide_mat3s {
             type Output = Self;
             #[inline]
             fn add(self, rhs: Self) -> Self::Output {
-                self.add_mat3(&rhs)
+                Self::from_cols(
+                    self.x_axis.add(rhs.x_axis),
+                    self.y_axis.add(rhs.y_axis),
+                    self.z_axis.add(rhs.z_axis),
+                )
+            }
+        }
+
+        impl Add<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                self.add(*rhs)
+            }
+        }
+
+        impl Add<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: Self) -> Self::Output {
+                (*self).add(rhs)
+            }
+        }
+
+        impl Add<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                (*self).add(*rhs)
             }
         }
 
         impl AddAssign for $n {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
-                *self = self.add_mat3(&rhs);
+                *self = self.add(rhs);
+            }
+        }
+
+        impl AddAssign<&Self> for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: &Self) {
+                self.add_assign(*rhs);
             }
         }
 
@@ -613,14 +699,49 @@ macro_rules! wide_mat3s {
             type Output = Self;
             #[inline]
             fn sub(self, rhs: Self) -> Self::Output {
-                self.sub_mat3(&rhs)
+                Self::from_cols(
+                    self.x_axis.sub(rhs.x_axis),
+                    self.y_axis.sub(rhs.y_axis),
+                    self.z_axis.sub(rhs.z_axis),
+                )
+            }
+        }
+
+        impl Sub<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                self.sub(*rhs)
+            }
+        }
+
+        impl Sub<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: Self) -> Self::Output {
+                (*self).sub(rhs)
+            }
+        }
+
+        impl Sub<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                (*self).sub(*rhs)
             }
         }
 
         impl SubAssign for $n {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
-                *self = self.sub_mat3(&rhs);
+                *self = self.sub(rhs);
+            }
+        }
+
+        impl SubAssign<&Self> for $n {
+            #[inline]
+            fn sub_assign(&mut self, rhs: &Self) {
+                self.sub_assign(*rhs);
             }
         }
 
@@ -632,18 +753,100 @@ macro_rules! wide_mat3s {
             }
         }
 
-        impl Mul for $n {
-            type Output = Self;
+        impl Neg for &$n {
+            type Output = $n;
             #[inline]
-            fn mul(self, rhs: Self) -> Self::Output {
-                self.mul_mat3(&rhs)
+            fn neg(self) -> Self::Output {
+                (*self).neg()
             }
         }
 
-        impl MulAssign for $n {
+        impl Mul for $n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self::Output {
+                $n::from_cols(self.mul(rhs.x_axis), self.mul(rhs.y_axis), self.mul(rhs.z_axis))
+            }
+        }
+
+        impl Mul<&Self> for $n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &Self) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &Self) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
+        impl MulAssign<Self> for $n {
             #[inline]
             fn mul_assign(&mut self, rhs: Self) {
-                *self = self.mul_mat3(&rhs);
+                *self = self.mul(rhs);
+            }
+        }
+
+        impl MulAssign<&Self> for $n {
+            #[inline]
+            fn mul_assign(&mut self, rhs: &Self) {
+                *self = self.mul(*rhs);
+            }
+        }
+
+        impl Mul<$m32t> for $n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: $m32t) -> Self::Output {
+                $m32t::from_cols(
+                    $vt::new(
+                        self.row(0).dot(rhs.x_axis),
+                        self.row(1).dot(rhs.x_axis),
+                        self.row(2).dot(rhs.x_axis),
+                    ),
+                    $vt::new(
+                        self.row(0).dot(rhs.y_axis),
+                        self.row(1).dot(rhs.y_axis),
+                        self.row(2).dot(rhs.y_axis),
+                    ),
+                )
+            }
+        }
+
+        impl Mul<&$m32t> for $n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: &$m32t) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$m32t> for &$n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: $m32t) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$m32t> for &$n {
+            type Output = $m32t;
+            #[inline]
+            fn mul(self, rhs: &$m32t) -> Self::Output {
+                (*self).mul(*rhs)
             }
         }
 
@@ -655,11 +858,59 @@ macro_rules! wide_mat3s {
             }
         }
 
+        impl Mul<&$vt> for $n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: &$vt) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$vt> for &$n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: $vt) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$vt> for &$n {
+            type Output = $vt;
+            #[inline]
+            fn mul(self, rhs: &$vt) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl Mul<$n> for $t {
             type Output = $n;
             #[inline]
             fn mul(self, rhs: $n) -> Self::Output {
                 rhs.mul_scalar(self)
+            }
+        }
+
+        impl Mul<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                (*self).mul(*rhs)
             }
         }
 
@@ -671,10 +922,41 @@ macro_rules! wide_mat3s {
             }
         }
 
+        impl Mul<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl MulAssign<$t> for $n {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                *self = self.mul_scalar(rhs);
+                *self = self.mul(rhs);
+            }
+        }
+
+        impl MulAssign<&$t> for $n {
+            #[inline]
+            fn mul_assign(&mut self, rhs: &$t) {
+                self.mul_assign(*rhs);
             }
         }
 
@@ -686,6 +968,30 @@ macro_rules! wide_mat3s {
             }
         }
 
+        impl Div<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $n) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl Div<$t> for $n {
             type Output = Self;
             #[inline]
@@ -694,10 +1000,41 @@ macro_rules! wide_mat3s {
             }
         }
 
+        impl Div<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $t) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl DivAssign<$t> for $n {
             #[inline]
             fn div_assign(&mut self, rhs: $t) {
-                *self = self.div_scalar(rhs);
+                *self = self.div(rhs);
+            }
+        }
+
+        impl DivAssign<&$t> for $n {
+            #[inline]
+            fn div_assign(&mut self, rhs: &$t) {
+                self.div_assign(*rhs);
             }
         }
 
@@ -742,12 +1079,12 @@ macro_rules! wide_mat3s {
 
 #[cfg(feature = "f32")]
 wide_mat3s!(
-    Mat3x4 => Mat3, Quatx4, Mat2x4, Vec2x4, Vec3x4, f32x4,
-    Mat3x8 => Mat3, Quatx8, Mat2x8, Vec2x8, Vec3x8, f32x8
+    Mat3x4 => Mat3, SymmetricMat3x4, Quatx4, Mat2x4, Mat23x4, Mat32x4, Vec2x4, Vec3x4, f32x4,
+    Mat3x8 => Mat3, SymmetricMat3x8, Quatx8, Mat2x8, Mat23x8, Mat32x8, Vec2x8, Vec3x8, f32x8
 );
 
 #[cfg(feature = "f64")]
 wide_mat3s!(
-    DMat3x2 => DMat3, DQuatx2, DMat2x2, DVec2x2, DVec3x2, f64x2,
-    DMat3x4 => DMat3, DQuatx4, DMat2x4, DVec2x4, DVec3x4, f64x4
+    DMat3x2 => DMat3, DSymmetricMat3x2, DQuatx2, DMat2x2, DMat23x2, DMat32x2, DVec2x2, DVec3x2, f64x2,
+    DMat3x4 => DMat3, DSymmetricMat3x4, DQuatx4, DMat2x4, DMat23x4, DMat32x4, DVec2x4, DVec3x4, f64x4
 );

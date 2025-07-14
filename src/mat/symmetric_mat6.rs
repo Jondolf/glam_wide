@@ -1,26 +1,26 @@
 use core::iter::Sum;
 use core::ops::*;
 #[cfg(feature = "f64")]
-use glam::{DMat3, DVec3};
+use glam::DMat3;
 #[cfg(feature = "f32")]
-use glam::{Mat3, Vec3};
-use glam_matrix_extensions::SquareMatExt;
+use glam::Mat3;
+#[cfg(feature = "f64")]
+use glam_matrix_extensions::{DSymmetricMat3, DSymmetricMat6};
+#[cfg(feature = "f32")]
+use glam_matrix_extensions::{SymmetricMat3, SymmetricMat6};
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
-use crate::FloatExt;
 #[cfg(feature = "f64")]
-use crate::{
-    DMat3x2, DMat3x4, DSymmetricMat3, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2, DVec3x4,
-};
+use crate::{DMat3x2, DMat3x4, DSymmetricMat3x2, DSymmetricMat3x4, DVec3x2, DVec3x4};
 #[cfg(feature = "f32")]
-use crate::{Mat3x4, Mat3x8, SymmetricMat3, SymmetricMat3x4, SymmetricMat3x8, Vec3x4, Vec3x8};
+use crate::{Mat3x4, Mat3x8, SymmetricMat3x4, SymmetricMat3x8, Vec3x4, Vec3x8};
 
-macro_rules! symmetric_mat6s {
-    ($reflect_trait:path, $($n:ident => $symmetricm3t:ident, $m3t:ident, $v3t:ident, $t:ident, $nonwidet:ident),+) => {
+macro_rules! wide_symmetric_mat6s {
+    ($($n:ident => $nonwiden:ident, $nonsymmetricn:ident, $symmetricm3t:ident, $m3t:ident, $nonwidesymmetricm3t:ident, $nonwidem3t:ident, $v3t:ident, $t:ident, $nonwidet:ident),+) => {
         $(
-        /// The bottom left triangle (including the diagonal) of a symmetric 6x6 column-major matrix.
+        /// The bottom left triangle (including the diagonal) of a wide symmetric 6x6 column-major matrix.
         ///
         /// This is useful for storing a symmetric 6x6 matrix in a more compact form and performing some
         /// matrix operations more efficiently.
@@ -43,7 +43,6 @@ macro_rules! symmetric_mat6s {
         /// [ B  D  ]
         /// ```
         #[derive(Clone, Copy, Debug)]
-        #[cfg_attr(feature = "bevy_reflect", derive($reflect_trait))]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $n {
             /// The bottom left triangle of the top left 3x3 block of the matrix,
@@ -97,6 +96,40 @@ macro_rules! symmetric_mat6s {
                 Self { a, b, d }
             }
 
+            /// Creates a new symmetric 6x6 matrix from its bottom left triangle, including diagonal elements,
+            /// with all lanes set to the same values.
+            ///
+            /// The matrix is represented as:
+            ///
+            /// ```text
+            /// [ A  BT ]
+            /// [ B  D  ]
+            /// ```
+            #[inline]
+            #[must_use]
+            pub const fn new_splat(
+                a: $nonwidesymmetricm3t,
+                b: $nonwidem3t,
+                d: $nonwidesymmetricm3t,
+            ) -> Self {
+                Self {
+                    a: $symmetricm3t::splat(a),
+                    b: $m3t::splat(b),
+                    d: $symmetricm3t::splat(d),
+                }
+            }
+
+            /// Creates a new wide symmetric 6x6 matrix with all lanes set to `m`.
+            #[inline]
+            #[must_use]
+            pub const fn splat(m: $nonwiden) -> Self {
+                Self {
+                    a: $symmetricm3t::splat(m.a),
+                    b: $m3t::splat(m.b),
+                    d: $symmetricm3t::splat(m.d),
+                }
+            }
+
             /// Creates a new symmetric 6x6 matrix from the outer product `[v1, v2] * [v1, v2]^T`.
             #[inline]
             #[must_use]
@@ -112,11 +145,7 @@ macro_rules! symmetric_mat6s {
             #[inline]
             #[must_use]
             pub fn abs(&self) -> Self {
-                Self::new(
-                    self.a.abs(),
-                    self.b.abs(),
-                    self.d.abs(),
-                )
+                Self::new(self.a.abs(), self.b.abs(), self.d.abs())
             }
 
             /// Transforms a 6x1 vector that is split into two 3x1 vectors.
@@ -194,26 +223,18 @@ macro_rules! symmetric_mat6s {
                 (x1, x2)
             }
 
-            /// Adds two 6x6 matrices.
+            /// Adds two symmetric 6x6 matrices.
             #[inline]
             #[must_use]
-            pub fn add_symmetric_mat3(&self, rhs: &Self) -> Self {
-                Self::new(
-                    self.a.add_symmetric_mat3(&rhs.a),
-                    self.b.add_mat3(&rhs.b),
-                    self.d.add_symmetric_mat3(&rhs.d),
-                )
+            pub fn add_symmetric_mat6(&self, rhs: &Self) -> Self {
+                self.add(rhs)
             }
 
-            /// Subtracts two 6x6 matrices.
+            /// Subtracts two symmetric 6x6 matrices.
             #[inline]
             #[must_use]
-            pub fn sub_symmetric_mat3(&self, rhs: &Self) -> Self {
-                Self::new(
-                    self.a.sub_symmetric_mat3(&rhs.a),
-                    self.b.sub_mat3(&rhs.b),
-                    self.d.sub_symmetric_mat3(&rhs.d),
-                )
+            pub fn sub_symmetric_mat6(&self, rhs: &Self) -> Self {
+                self.sub(rhs)
             }
 
             /// Multiplies a 6x6 matrix by a scalar.
@@ -250,14 +271,45 @@ macro_rules! symmetric_mat6s {
             type Output = Self;
             #[inline]
             fn add(self, rhs: Self) -> Self::Output {
-                self.add_symmetric_mat3(&rhs)
+                Self::new(self.a.add(rhs.a), self.b.add(rhs.b), self.d.add(rhs.d))
+            }
+        }
+
+        impl Add<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                self.add(*rhs)
+            }
+        }
+
+        impl Add<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: Self) -> Self::Output {
+                (*self).add(rhs)
+            }
+        }
+
+        impl Add<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn add(self, rhs: &Self) -> Self::Output {
+                (*self).add(*rhs)
             }
         }
 
         impl AddAssign for $n {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
-                *self = *self + rhs;
+                *self = self.add(rhs);
+            }
+        }
+
+        impl AddAssign<&Self> for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: &Self) {
+                self.add_assign(*rhs);
             }
         }
 
@@ -265,14 +317,45 @@ macro_rules! symmetric_mat6s {
             type Output = Self;
             #[inline]
             fn sub(self, rhs: Self) -> Self::Output {
-                self.sub_symmetric_mat3(&rhs)
+                Self::new(self.a.sub(rhs.a), self.b.sub(rhs.b), self.d.sub(rhs.d))
+            }
+        }
+
+        impl Sub<&Self> for $n {
+            type Output = Self;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                self.sub(*rhs)
+            }
+        }
+
+        impl Sub<Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: Self) -> Self::Output {
+                (*self).sub(rhs)
+            }
+        }
+
+        impl Sub<&Self> for &$n {
+            type Output = $n;
+            #[inline]
+            fn sub(self, rhs: &Self) -> Self::Output {
+                (*self).sub(*rhs)
             }
         }
 
         impl SubAssign for $n {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
-                *self = *self - rhs;
+                *self = self.sub(rhs);
+            }
+        }
+
+        impl SubAssign<&Self> for $n {
+            #[inline]
+            fn sub_assign(&mut self, rhs: &Self) {
+                self.sub_assign(*rhs);
             }
         }
 
@@ -280,11 +363,15 @@ macro_rules! symmetric_mat6s {
             type Output = Self;
             #[inline]
             fn neg(self) -> Self::Output {
-                Self::new(
-                    -self.a,
-                    -self.b,
-                    -self.d,
-                )
+                Self::new(-self.a, -self.b, -self.d)
+            }
+        }
+
+        impl Neg for &$n {
+            type Output = $n;
+            #[inline]
+            fn neg(self) -> Self::Output {
+                (*self).neg()
             }
         }
 
@@ -296,6 +383,30 @@ macro_rules! symmetric_mat6s {
             }
         }
 
+        impl Mul<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$n) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl Mul<$t> for $n {
             type Output = Self;
             #[inline]
@@ -304,10 +415,41 @@ macro_rules! symmetric_mat6s {
             }
         }
 
+        impl Mul<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                self.mul(*rhs)
+            }
+        }
+
+        impl Mul<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> Self::Output {
+                (*self).mul(rhs)
+            }
+        }
+
+        impl Mul<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: &$t) -> Self::Output {
+                (*self).mul(*rhs)
+            }
+        }
+
         impl MulAssign<$t> for $n {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                *self = self.mul_scalar(rhs);
+                *self = self.mul(rhs);
+            }
+        }
+
+        impl MulAssign<&$t> for $n {
+            #[inline]
+            fn mul_assign(&mut self, rhs: &$t) {
+                self.mul_assign(*rhs);
             }
         }
 
@@ -319,6 +461,30 @@ macro_rules! symmetric_mat6s {
             }
         }
 
+        impl Div<&$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $n) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$n> for &$t {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$n) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl Div<$t> for $n {
             type Output = Self;
             #[inline]
@@ -327,10 +493,41 @@ macro_rules! symmetric_mat6s {
             }
         }
 
+        impl Div<&$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                self.div(*rhs)
+            }
+        }
+
+        impl Div<$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: $t) -> Self::Output {
+                (*self).div(rhs)
+            }
+        }
+
+        impl Div<&$t> for &$n {
+            type Output = $n;
+            #[inline]
+            fn div(self, rhs: &$t) -> Self::Output {
+                (*self).div(*rhs)
+            }
+        }
+
         impl DivAssign<$t> for $n {
             #[inline]
             fn div_assign(&mut self, rhs: $t) {
-                *self = self.div_scalar(rhs);
+                *self = self.div(rhs);
+            }
+        }
+
+        impl DivAssign<&$t> for $n {
+            #[inline]
+            fn div_assign(&mut self, rhs: &$t) {
+                self.div_assign(*rhs);
             }
         }
 
@@ -349,230 +546,14 @@ macro_rules! symmetric_mat6s {
     }
 }
 
-macro_rules! impl_scalar_symmetric_mat6s {
-    ($($n:ident => $t:ident),+) => {
-        $(
-        impl $n {
-            /// Returns `true` if, and only if, all elements are finite.
-            /// If any element is either `NaN` or positive or negative infinity, this will return `false`.
-            #[inline]
-            #[must_use]
-            pub fn is_finite(&self) -> bool {
-                self.a.is_finite()
-                    && self.b.is_finite()
-                    && self.d.is_finite()
-            }
-
-            /// Returns `true` if any elements are `NaN`.
-            #[inline]
-            #[must_use]
-            pub fn is_nan(&self) -> bool {
-                self.a.is_nan()
-                    || self.b.is_nan()
-                    || self.d.is_nan()
-            }
-        }
-
-        impl PartialEq for $n {
-            #[inline]
-            fn eq(&self, other: &Self) -> bool {
-                self.a == other.a && self.b == other.b && self.d == other.d
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::AbsDiffEq for $n {
-            type Epsilon = $t;
-
-            #[inline]
-            fn default_epsilon() -> Self::Epsilon {
-                $t::default_epsilon()
-            }
-
-            #[inline]
-            fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                self.a.abs_diff_eq(&other.a, epsilon)
-                    && self.b.abs_diff_eq(other.b, epsilon)
-                    && self.d.abs_diff_eq(&other.d, epsilon)
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::RelativeEq for $n {
-            #[inline]
-            fn default_max_relative() -> Self::Epsilon {
-                $t::default_max_relative()
-            }
-
-            #[inline]
-            fn relative_eq(
-                &self,
-                other: &Self,
-                epsilon: Self::Epsilon,
-                max_relative: Self::Epsilon,
-            ) -> bool {
-                self.a.relative_eq(&other.a, epsilon, max_relative)
-                    && self.b.relative_eq(&other.b, epsilon, max_relative)
-                    && self.d.relative_eq(&other.d, epsilon, max_relative)
-            }
-        }
-
-        #[cfg(feature = "approx")]
-        impl approx::UlpsEq for $n {
-            #[inline]
-            fn default_max_ulps() -> u32 {
-                $t::default_max_ulps()
-            }
-
-            #[inline]
-            fn ulps_eq(
-                &self,
-                other: &Self,
-                epsilon: Self::Epsilon,
-                max_ulps: u32,
-            ) -> bool {
-                self.a.ulps_eq(&other.a, epsilon, max_ulps)
-                    && self.b.ulps_eq(&other.b, epsilon, max_ulps)
-                    && self.d.ulps_eq(&other.d, epsilon, max_ulps)
-            }
-        }
-        )+
-    }
-}
-
-macro_rules! impl_wide_symmetric_mat6s {
-    ($($n:ident => $nonwiden:ident, $widesymmetricm3t:ident, $widem3t:ident, $nonwidesymmetricm3t:ident, $nonwidem3t:ident),+) => {
-        $(
-        impl $n {
-            /// Creates a new symmetric 6x6 matrix from its bottom left triangle, including diagonal elements,
-            /// with all lanes set to the same values.
-            ///
-            /// The matrix is represented as:
-            ///
-            /// ```text
-            /// [ A  BT ]
-            /// [ B  D  ]
-            /// ```
-            #[inline]
-            #[must_use]
-            pub const fn new_splat(
-                a: $nonwidesymmetricm3t,
-                b: $nonwidem3t,
-                d: $nonwidesymmetricm3t,
-            ) -> Self {
-                Self {
-                    a: $widesymmetricm3t::splat(a),
-                    b: $widem3t::splat(b),
-                    d: $widesymmetricm3t::splat(d),
-                }
-            }
-
-            /// Creates a new wide symmetric 6x6 matrix with all lanes set to `m`.
-            #[inline]
-            #[must_use]
-            pub const fn splat(m: $nonwiden) -> Self {
-                Self {
-                    a: $widesymmetricm3t::splat(m.a),
-                    b: $widem3t::splat(m.b),
-                    d: $widesymmetricm3t::splat(m.d),
-                }
-            }
-        }
-        )+
-    }
-}
-
 #[cfg(feature = "f32")]
-symmetric_mat6s!(
-    bevy_reflect::Reflect,
-    SymmetricMat6 => SymmetricMat3, Mat3, Vec3, f32, f32
-);
-
-#[cfg(feature = "f32")]
-symmetric_mat6s!(
-    bevy_reflect::TypePath,
-    SymmetricMat6x4 => SymmetricMat3x4, Mat3x4, Vec3x4, f32x4, f32,
-    SymmetricMat6x8 => SymmetricMat3x8, Mat3x8, Vec3x8, f32x8, f32
+wide_symmetric_mat6s!(
+    SymmetricMat6x4 => SymmetricMat6, Mat6x4, SymmetricMat3x4, Mat3x4, SymmetricMat3, Mat3, Vec3x4, f32x4, f32,
+    SymmetricMat6x8 => SymmetricMat6, Mat6x8, SymmetricMat3x8, Mat3x8, SymmetricMat3, Mat3, Vec3x8, f32x8, f32
 );
 
 #[cfg(feature = "f64")]
-symmetric_mat6s!(
-    bevy_reflect::Reflect,
-    DSymmetricMat6 => DSymmetricMat3, DMat3, DVec3, f64, f64
+wide_symmetric_mat6s!(
+    DSymmetricMat6x2 => DSymmetricMat6, DMat6x2, DSymmetricMat3x2, DMat3x2, DSymmetricMat3, DMat3, DVec3x2, f64x2, f64,
+    DSymmetricMat6x4 => DSymmetricMat6, DMat6x4, DSymmetricMat3x4, DMat3x4, DSymmetricMat3, DMat3, DVec3x4, f64x4, f64
 );
-
-#[cfg(feature = "f64")]
-symmetric_mat6s!(
-    bevy_reflect::TypePath,
-    DSymmetricMat6x2 => DSymmetricMat3x2, DMat3x2, DVec3x2, f64x2, f64,
-    DSymmetricMat6x4 => DSymmetricMat3x4, DMat3x4, DVec3x4, f64x4, f64
-);
-
-#[cfg(feature = "f32")]
-impl_scalar_symmetric_mat6s!(SymmetricMat6 => f32);
-
-#[cfg(feature = "f64")]
-impl_scalar_symmetric_mat6s!(DSymmetricMat6 => f64);
-
-#[cfg(feature = "f32")]
-impl_wide_symmetric_mat6s!(
-    SymmetricMat6x4 => SymmetricMat6, SymmetricMat3x4, Mat3x4, SymmetricMat3, Mat3,
-    SymmetricMat6x8 => SymmetricMat6, SymmetricMat3x8, Mat3x8, SymmetricMat3, Mat3
-);
-
-#[cfg(feature = "f64")]
-impl_wide_symmetric_mat6s!(
-    DSymmetricMat6x2 => DSymmetricMat6, DSymmetricMat3x2, DMat3x2, DSymmetricMat3, DMat3,
-    DSymmetricMat6x4 => DSymmetricMat6, DSymmetricMat3x4, DMat3x4, DSymmetricMat3, DMat3
-);
-
-#[cfg(test)]
-mod tests {
-    use approx::assert_relative_eq;
-    use glam::{Mat3, Vec3};
-
-    use crate::{SymmetricMat3, SymmetricMat6};
-
-    #[test]
-    fn ldlt_solve() {
-        let a = SymmetricMat3::new(4.0, 1.0, 5.0, 0.0, 2.0, 6.0);
-        let b = Mat3::IDENTITY;
-        let d = SymmetricMat3::new(7.0, 0.0, 8.0, 0.0, 0.0, 9.0);
-        let sym6 = SymmetricMat6 { a, b, d };
-
-        // Known solution (x1, x2)
-        let x1 = Vec3::new(1.0, 2.0, 3.0);
-        let x2 = Vec3::new(4.0, 5.0, 6.0);
-
-        // Compute rhs = A * x
-        let (rhs1, rhs2) = sym6.mul_vec6(x1, x2);
-        assert_eq!(rhs1, Vec3::new(25.0, 12.0, 33.0));
-        assert_eq!(rhs2, Vec3::new(77.0, 2.0, 89.0));
-
-        // Solve
-        let (sol1, sol2) = sym6.ldlt_solve(rhs1, rhs2);
-
-        // Check solution
-        assert_relative_eq!(sol1, x1, epsilon = 1e-4);
-        assert_relative_eq!(sol2, x2, epsilon = 1e-4);
-    }
-
-    #[test]
-    fn ldlt_solve_identity() {
-        let sym6 = SymmetricMat6::IDENTITY;
-
-        // Known solution (x1, x2)
-        let x1 = Vec3::new(7.0, -3.0, 2.5);
-        let x2 = Vec3::new(-1.0, 4.5, 0.0);
-
-        // Compute rhs = A * x
-        let (rhs1, rhs2) = sym6.mul_vec6(x1, x2);
-
-        // Solve
-        let (sol1, sol2) = sym6.ldlt_solve(rhs1, rhs2);
-
-        // Check solution
-        assert_relative_eq!(sol1, x1, epsilon = 1e-6);
-        assert_relative_eq!(sol2, x2, epsilon = 1e-6);
-    }
-}
