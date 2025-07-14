@@ -21,7 +21,7 @@ internal calculations, and provides types such as `Vec3A` that are aligned for S
 This type of SIMD is almost entirely transparent to the user.
 
 `glam_wide` on the other hand provides "wide" alternatives for Glam's types, focusing on vertical SIMD.
-It operates in an [AoSoA (Array of Structs of Arrays)](https://en.wikipedia.org/wiki/AoS_and_SoA) fashion,
+It operates in an [AoSoA (Array of Structures of Arrays)](https://en.wikipedia.org/wiki/AoS_and_SoA) fashion,
 where each vector or matrix type contains multiple "lanes" of data, allowing you to perform operations
 on multiple vectors or matrices at once. For example, a `Vec3x4` contains an `f32x4` for the `x`, `y`, and `z` axes,
 and operations on it will operate on all four vectors at once.
