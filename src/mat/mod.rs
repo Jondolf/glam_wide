@@ -1,9 +1,9 @@
+mod mat2;
 #[cfg(feature = "glam_matrix_extensions")]
 mod mat23;
-mod mat2_wide;
+mod mat3;
 #[cfg(feature = "glam_matrix_extensions")]
 mod mat32;
-mod mat3_wide;
 #[cfg(feature = "glam_matrix_extensions")]
 mod symmetric_mat2;
 #[cfg(feature = "glam_matrix_extensions")]
@@ -12,20 +12,20 @@ mod symmetric_mat3;
 mod symmetric_mat6;
 
 #[cfg(feature = "f64")]
-pub use mat2_wide::{DMat2x2, DMat2x4};
+pub use mat2::{DMat2x2, DMat2x4};
 #[cfg(feature = "f32")]
-pub use mat2_wide::{Mat2x4, Mat2x8};
+pub use mat2::{Mat2x4, Mat2x8};
 #[cfg(feature = "f64")]
-pub use mat3_wide::{DMat3x2, DMat3x4};
+pub use mat3::{DMat3x2, DMat3x4};
 #[cfg(feature = "f32")]
-pub use mat3_wide::{Mat3x4, Mat3x8};
-#[cfg(feature = "f64")]
+pub use mat3::{Mat3x4, Mat3x8};
+#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
 pub use mat23::{DMat23x2, DMat23x4};
-#[cfg(feature = "f32")]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use mat23::{Mat23x4, Mat23x8};
-#[cfg(feature = "f64")]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
 pub use mat32::{DMat32x2, DMat32x4};
-#[cfg(feature = "f32")]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use mat32::{Mat32x4, Mat32x8};
 #[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
 pub use symmetric_mat2::{DSymmetricMat2x2, DSymmetricMat2x4};

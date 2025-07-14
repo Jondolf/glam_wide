@@ -9,15 +9,13 @@ use wide::{f32x4, f32x8};
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{
-    DMat2x2, DMat2x4, DMat23x2, DMat23x4, DMat32x2, DMat32x4, DQuatx2, DQuatx4, DVec2x2, DVec2x4,
-    DVec3x2, DVec3x4,
-};
+use crate::{DMat2x2, DMat2x4, DQuatx2, DQuatx4, DVec2x2, DVec2x4, DVec3x2, DVec3x4};
+#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+use crate::{DMat23x2, DMat23x4, DMat32x2, DMat32x4};
 #[cfg(feature = "f32")]
-use crate::{
-    Mat2x4, Mat2x8, Mat23x4, Mat23x8, Mat32x4, Mat32x8, Quatx4, Quatx8, Vec2x4, Vec2x8, Vec3x4,
-    Vec3x8,
-};
+use crate::{Mat2x4, Mat2x8, Quatx4, Quatx8, Vec2x4, Vec2x8, Vec3x4, Vec3x8};
+#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+use crate::{Mat23x4, Mat23x8, Mat32x4, Mat32x8};
 
 macro_rules! wide_mat3s {
     ($($n:ident => $nonwiden:ident, $symmetricn:ident, $qt:ident, $m2t:ident, $m23t:ident, $m32t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
@@ -539,6 +537,7 @@ macro_rules! wide_mat3s {
             /// Multiplies `self` by a 3x2 matrix, `self * rhs`.
             #[inline]
             #[must_use]
+            #[cfg(feature = "glam_matrix_extensions")]
             pub fn mul_mat23(&self, rhs: &$m32t) -> $m32t {
                 self.mul(rhs)
             }
@@ -548,6 +547,7 @@ macro_rules! wide_mat3s {
             /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
             #[inline]
             #[must_use]
+            #[cfg(feature = "glam_matrix_extensions")]
             pub fn complete_mat23_sandwich(a: &$m23t, b: &$m23t) -> Self {
                 Self::from_cols(
                     $vt::new(
@@ -573,6 +573,7 @@ macro_rules! wide_mat3s {
             /// This effectively completes the second half of the sandwich product `b * M * transpose(b)`.
             #[inline]
             #[must_use]
+            #[cfg(feature = "glam_matrix_extensions")]
             pub fn complete_mat32_sandwich(a: &$m32t, b: &$m32t) -> Self {
                 Self::from_cols(
                     $vt::new(
@@ -807,6 +808,7 @@ macro_rules! wide_mat3s {
             }
         }
 
+        #[cfg(feature = "glam_matrix_extensions")]
         impl Mul<$m32t> for $n {
             type Output = $m32t;
             #[inline]
@@ -826,6 +828,7 @@ macro_rules! wide_mat3s {
             }
         }
 
+        #[cfg(feature = "glam_matrix_extensions")]
         impl Mul<&$m32t> for $n {
             type Output = $m32t;
             #[inline]
@@ -834,6 +837,7 @@ macro_rules! wide_mat3s {
             }
         }
 
+        #[cfg(feature = "glam_matrix_extensions")]
         impl Mul<$m32t> for &$n {
             type Output = $m32t;
             #[inline]
@@ -842,6 +846,7 @@ macro_rules! wide_mat3s {
             }
         }
 
+        #[cfg(feature = "glam_matrix_extensions")]
         impl Mul<&$m32t> for &$n {
             type Output = $m32t;
             #[inline]
