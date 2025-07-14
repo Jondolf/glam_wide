@@ -12,7 +12,7 @@ keywords = ["gamedev", "math", "simd", "matrix", "vector"]
 categories = ["game-development", "science", "simulation"]
 
 [features]
-default = ["std", "f32", "f64", "glam_matrix_extensions", "bevy_math"]
+default = ["std", "f32", "f64"]
 
 # Enable single-precision floating point types.
 f32 = ["glam_matrix_extensions?/f32"]
