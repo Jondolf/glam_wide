@@ -1,7 +1,7 @@
 use core::iter::Sum;
 use core::ops::*;
 #[cfg(feature = "f64")]
-use glam_matrix_extensions::DSymmetricMat2;
+use glam_matrix_extensions::SymmetricDMat2;
 #[cfg(feature = "f32")]
 use glam_matrix_extensions::SymmetricMat2;
 use wide::{f32x4, f32x8};
@@ -1032,6 +1032,6 @@ wide_symmetric_mat2s!(
 
 #[cfg(feature = "f64")]
 wide_symmetric_mat2s!(
-    DSymmetricMat2x2 => DSymmetricMat2, DMat2x2, DMat23x2, DMat32x2, DVec2x2, f64x2, f64,
-    DSymmetricMat2x4 => DSymmetricMat2, DMat2x4, DMat23x4, DMat32x4, DVec2x4, f64x4, f64
+    SymmetricDMat2x2 => SymmetricDMat2, DMat2x2, DMat23x2, DMat32x2, DVec2x2, f64x2, f64,
+    SymmetricDMat2x4 => SymmetricDMat2, DMat2x4, DMat23x4, DMat32x4, DVec2x4, f64x4, f64
 );

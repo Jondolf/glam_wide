@@ -11,11 +11,11 @@ use wide::{f64x2, f64x4};
 #[cfg(feature = "f64")]
 use crate::{DMat3x2, DMat3x4, DVec2x2, DVec2x4};
 #[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
-use crate::{DMat23x2, DMat23x4, DMat32x2, DMat32x4, DSymmetricMat2x2, DSymmetricMat2x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
-use crate::{Mat2x4, Mat2x8, SymmetricMat2x4, SymmetricMat2x8};
+use crate::{DMat23x2, DMat23x4, DMat32x2, DMat32x4, SymmetricDMat2x2, SymmetricDMat2x4};
 #[cfg(feature = "f32")]
 use crate::{Mat3x4, Mat3x8, Vec2x4, Vec2x8};
+#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+use crate::{Mat23x4, Mat23x8, Mat32x4, Mat32x8, SymmetricMat2x4, SymmetricMat2x8};
 
 macro_rules! wide_mat2s {
     ($($n:ident => $nonwiden:ident, $symmetricn:ident, $m3t:ident, $m23t:ident, $m32t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
@@ -807,6 +807,6 @@ wide_mat2s!(
 
 #[cfg(feature = "f64")]
 wide_mat2s!(
-    DMat2x2 => DMat2, DSymmetricMat2x2, DMat3x2, DMat23x2, DMat32x2, DVec3x2, DVec2x2, f64x2,
-    DMat2x4 => DMat2, DSymmetricMat2x4, DMat3x4, DMat23x4, DMat32x4, DVec3x4, DVec2x4, f64x4
+    DMat2x2 => DMat2, SymmetricDMat2x2, DMat3x2, DMat23x2, DMat32x2, DVec3x2, DVec2x2, f64x2,
+    DMat2x4 => DMat2, SymmetricDMat2x4, DMat3x4, DMat23x4, DMat32x4, DVec3x4, DVec2x4, f64x4
 );

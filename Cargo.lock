@@ -264,7 +264,7 @@ dependencies = [
 [[package]]
 name = "glam_matrix_extensions"
 version = "0.1.0"
-source = "git+https://github.com/Jondolf/glam_matrix_extensions#6dd5f4da7dab8440bc5be953894ffe867a0c2364"
+source = "git+https://github.com/Jondolf/glam_matrix_extensions#3dcfc3b9279fbe792f240a56c96bae8949f4a499"
 dependencies = [
  "approx",
  "glam",

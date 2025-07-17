@@ -47,11 +47,11 @@ The following features are provided by `glam_wide`, or are being actively worked
   - [x] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`
   - [ ] 4x4 matrices: `Mat4x4`, `Mat4x8`, `DMat4x2`, `DMat4x4`
 - Wide symmetric matrices
-  - [x] Symmetric 2x2 matrices: `SymmetricMat2x4`, `SymmetricMat2x8`, `DSymmetricMat2x2`, `DSymmetricMat2x4`
-  - [x] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `DSymmetricMat3x2`, `DSymmetricMat3x4`
-  - [ ] Symmetric 4x4 matrices: `SymmetricMat4x4`, `SymmetricMat4x8`, `DSymmetricMat4x2`, `DSymmetricMat4x4`
-  - [ ] Symmetric 5x5 matrices: `SymmetricMat5x4`, `SymmetricMat5x8`, `DSymmetricMat5x2`, `DSymmetricMat5x4`
-  - [x] Symmetric 6x6 matrices: `SymmetricMat6x4`, `SymmetricMat6x8`, `DSymmetricMat6x2`, `DSymmetricMat6x4`
+  - [x] Symmetric 2x2 matrices: `SymmetricMat2x4`, `SymmetricMat2x8`, `SymmetricDMat2x2`, `SymmetricDMat2x4`
+  - [x] Symmetric 3x3 matrices: `SymmetricMat3x4`, `SymmetricMat3x8`, `SymmetricDMat3x2`, `SymmetricDMat3x4`
+  - [ ] Symmetric 4x4 matrices: `SymmetricMat4x4`, `SymmetricMat4x8`, `SymmetricDMat4x2`, `SymmetricDMat4x4`
+  - [ ] Symmetric 5x5 matrices: `SymmetricMat5x4`, `SymmetricMat5x8`, `SymmetricDMat5x2`, `SymmetricDMat5x4`
+  - [x] Symmetric 6x6 matrices: `SymmetricMat6x4`, `SymmetricMat6x8`, `SymmetricDMat6x2`, `SymmetricDMat6x4`
 - Wide rectangular matrices
   - [x] 2x3 matrices: `Mat23x4`, `Mat23x8`, `DMat23x2`, `DMat23x4`
   - [x] 3x2 matrices: `Mat32x4`, `Mat32x8`, `DMat32x2`, `DMat32x4`

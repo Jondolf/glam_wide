@@ -1090,6 +1090,6 @@ wide_mat3s!(
 
 #[cfg(feature = "f64")]
 wide_mat3s!(
-    DMat3x2 => DMat3, DSymmetricMat3x2, DQuatx2, DMat2x2, DMat23x2, DMat32x2, DVec2x2, DVec3x2, f64x2,
-    DMat3x4 => DMat3, DSymmetricMat3x4, DQuatx4, DMat2x4, DMat23x4, DMat32x4, DVec2x4, DVec3x4, f64x4
+    DMat3x2 => DMat3, SymmetricDMat3x2, DQuatx2, DMat2x2, DMat23x2, DMat32x2, DVec2x2, DVec3x2, f64x2,
+    DMat3x4 => DMat3, SymmetricDMat3x4, DQuatx4, DMat2x4, DMat23x4, DMat32x4, DVec2x4, DVec3x4, f64x4
 );

@@ -28,15 +28,15 @@ pub use mat32::{DMat32x2, DMat32x4};
 #[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use mat32::{Mat32x4, Mat32x8};
 #[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
-pub use symmetric_mat2::{DSymmetricMat2x2, DSymmetricMat2x4};
+pub use symmetric_mat2::{SymmetricDMat2x2, SymmetricDMat2x4};
 #[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use symmetric_mat2::{SymmetricMat2x4, SymmetricMat2x8};
 #[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
-pub use symmetric_mat3::{DSymmetricMat3x2, DSymmetricMat3x4};
+pub use symmetric_mat3::{SymmetricDMat3x2, SymmetricDMat3x4};
 #[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use symmetric_mat3::{SymmetricMat3x4, SymmetricMat3x8};
 #[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
-pub use symmetric_mat6::{DSymmetricMat6x2, DSymmetricMat6x4};
+pub use symmetric_mat6::{SymmetricDMat6x2, SymmetricDMat6x4};
 #[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
 pub use symmetric_mat6::{SymmetricMat6x4, SymmetricMat6x8};
 

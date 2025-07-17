@@ -11,8 +11,8 @@ use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{
-    DMat2x2, DMat2x4, DMat3x2, DMat3x4, DMat32x2, DMat32x4, DSymmetricMat3x2, DSymmetricMat3x4,
-    DVec2x2, DVec2x4, DVec3x2, DVec3x4,
+    DMat2x2, DMat2x4, DMat3x2, DMat3x4, DMat32x2, DMat32x4, DVec2x2, DVec2x4, DVec3x2, DVec3x4,
+    SymmetricDMat3x2, SymmetricDMat3x4,
 };
 #[cfg(feature = "f32")]
 use crate::{
@@ -794,6 +794,6 @@ wide_mat23s!(
 
 #[cfg(feature = "f64")]
 wide_mat23s!(
-    DMat23x2 => DMat23, DMat32x2, DSymmetricMat3x2, DMat2x2, DMat3x2, DVec2x2, DVec3x2, f64x2,
-    DMat23x4 => DMat23, DMat32x4, DSymmetricMat3x4, DMat2x4, DMat3x4, DVec2x4, DVec3x4, f64x4
+    DMat23x2 => DMat23, DMat32x2, SymmetricDMat3x2, DMat2x2, DMat3x2, DVec2x2, DVec3x2, f64x2,
+    DMat23x4 => DMat23, DMat32x4, SymmetricDMat3x4, DMat2x4, DMat3x4, DVec2x4, DVec3x4, f64x4
 );
