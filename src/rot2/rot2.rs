@@ -253,7 +253,7 @@ macro_rules! wide_rot2s {
         impl From<$n> for $mt {
             /// Creates a rotation matrix from a 2D rotation.
             fn from(rot: $n) -> Self {
-                $mt::from_cols_array(&[rot.cos, -rot.sin, rot.sin, rot.cos])
+                $mt::from_cols_array(&[rot.cos, rot.sin, -rot.sin, rot.cos])
             }
         }
 

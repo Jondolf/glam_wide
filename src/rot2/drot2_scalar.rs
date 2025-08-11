@@ -446,7 +446,7 @@ impl From<f64> for DRot2 {
 impl From<DRot2> for DMat2 {
     /// Creates a [`DMat2`] rotation matrix from a [`DRot2`].
     fn from(rot: DRot2) -> Self {
-        DMat2::from_cols_array(&[rot.cos, -rot.sin, rot.sin, rot.cos])
+        DMat2::from_cols_array(&[rot.cos, rot.sin, -rot.sin, rot.cos])
     }
 }
 
@@ -517,7 +517,7 @@ mod tests {
     use core::f64::consts::FRAC_PI_2;
 
     use approx::assert_relative_eq;
-    use glam::DVec2;
+    use glam::{DMat2, DVec2};
 
     use crate::DRot2;
 
@@ -726,5 +726,21 @@ mod tests {
         assert!(rot1.slerp(rot2, 0.0).is_near_identity());
         assert_eq!(rot1.slerp(rot2, 0.5).as_degrees(), 90.0);
         assert_eq!(rot1.slerp(rot2, 1.0).as_degrees().abs(), 180.0);
+    }
+
+    #[test]
+    fn rotation_matrix() {
+        let rotation = DRot2::degrees(90.0);
+        let matrix: DMat2 = rotation.into();
+
+        // Check that the matrix is correct.
+        assert_relative_eq!(matrix.x_axis, DVec2::Y);
+        assert_relative_eq!(matrix.y_axis, DVec2::NEG_X);
+
+        // Check that the matrix rotates vectors correctly.
+        assert_relative_eq!(matrix * DVec2::X, DVec2::Y);
+        assert_relative_eq!(matrix * DVec2::Y, DVec2::NEG_X);
+        assert_relative_eq!(matrix * DVec2::NEG_X, DVec2::NEG_Y);
+        assert_relative_eq!(matrix * DVec2::NEG_Y, DVec2::X);
     }
 }
