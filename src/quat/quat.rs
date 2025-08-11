@@ -471,7 +471,7 @@ macro_rules! wide_quats {
                     1 => &self.y,
                     2 => &self.z,
                     3 => &self.w,
-                    i => panic!("Invalid index {i} for vector of type: {}", std::any::type_name::<$n>()),
+                    i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
         }
@@ -483,7 +483,7 @@ macro_rules! wide_quats {
                     1 => &mut self.y,
                     2 => &mut self.z,
                     3 => &mut self.w,
-                    i => panic!("Invalid index {i} for vector of type: {}", std::any::type_name::<$n>()),
+                    i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
         }

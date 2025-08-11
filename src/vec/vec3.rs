@@ -658,7 +658,7 @@ macro_rules! wide_vec3s {
                     0 => &self.x,
                     1 => &self.y,
                     2 => &self.z,
-                    i => panic!("Invalid index {i} for vector of type: {}", std::any::type_name::<$n>()),
+                    i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
         }
@@ -669,12 +669,12 @@ macro_rules! wide_vec3s {
                     0 => &mut self.x,
                     1 => &mut self.y,
                     2 => &mut self.z,
-                    i => panic!("Invalid index {i} for vector of type: {}", std::any::type_name::<$n>()),
+                    i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
         }
 
-        impl std::iter::Sum<$n> for $n {
+        impl core::iter::Sum<$n> for $n {
             fn sum<I>(iter: I) -> Self where I: Iterator<Item = Self> {
                 // Kahan summation algorithm
                 // https://en.wikipedia.org/wiki/Kahan_summation_algorithm
