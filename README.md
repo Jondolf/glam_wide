@@ -38,6 +38,8 @@ The following features are provided by `glam_wide`, or are being actively worked
 - Wide number types provided by `wide`
   - [x] 32-bit floats: `f32x4`, `f32x8`
   - [x] 64-bit floats: `f64x2`, `f64x4`
+  - [x] 32-bit masks: `boolf32x4`, `boolf32x8`
+  - [x] 64-bit masks: `boolf64x4`, `boolf64x8`
 - Wide vectors
   - [x] 2D vectors: `Vec2x4`, `Vec2x8`, `DVec2x2`, `DVec2x4`
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`

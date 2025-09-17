@@ -2,12 +2,14 @@
 
 #![warn(missing_docs)]
 
+mod bool_wide;
 mod mat;
 mod quat;
 #[cfg(feature = "bevy_math")]
 mod rot2;
 mod vec;
 
+pub use bool_wide::*;
 pub use mat::*;
 pub use quat::*;
 #[cfg(feature = "bevy_math")]
@@ -97,6 +99,14 @@ impl_simd_lane_count! {
     (u32x8, 8),
     (u64x2, 2),
     (u64x4, 4),
+}
+
+// Mask types
+impl_simd_lane_count! {
+    (boolf32x4, 4),
+    (boolf32x8, 8),
+    (boolf64x2, 2),
+    (boolf64x4, 4),
 }
 
 // Vector types
