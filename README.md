@@ -38,10 +38,16 @@ The following features are provided by `glam_wide`, or are being actively worked
 - Wide number types provided by `wide`
   - [x] 32-bit floats: `f32x4`, `f32x8`
   - [x] 64-bit floats: `f64x2`, `f64x4`
+  - [x] 32-bit masks: `boolf32x4`, `boolf32x8`
+  - [x] 64-bit masks: `boolf64x4`, `boolf64x8`
 - Wide vectors
   - [x] 2D vectors: `Vec2x4`, `Vec2x8`, `DVec2x2`, `DVec2x4`
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`
   - [ ] 4D vectors: `Vec4x4`, `Vec4x8`, `DVec4x2`, `DVec4x4`
+- Wide vector masks
+  - [x] 2D vector masks: `BVec2x4`, `BVec2x8`, `BDVec2x2`, `BDVec2x4`
+  - [x] 3D vector masks: `BVec3x4`, `BVec3x8`, `BDVec3x2`, `BDVec3x4`
+  - [x] 4D vector masks: `BVec4x4`, `BVec4x8`, `BDVec4x2`, `BDVec4x4`
 - Wide square matrices
   - [x] 2x2 matrices: `Mat2x4`, `Mat2x8`, `DMat2x2`, `DMat2x4`
   - [x] 3x3 matrices: `Mat3x4`, `Mat3x8`, `DMat3x2`, `DMat3x4`
@@ -65,7 +71,6 @@ The following are not an active focus, but are open to contributions:
 - Wide integer vectors
 - Wide affine transformations
 - Wide isometries (`bevy_math`)
-- Wide boolean vectors
 - Full feature parity
 
 ## License

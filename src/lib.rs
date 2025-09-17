@@ -2,12 +2,16 @@
 
 #![warn(missing_docs)]
 
+mod bool_wide;
+mod bvec;
 mod mat;
 mod quat;
 #[cfg(feature = "bevy_math")]
 mod rot2;
 mod vec;
 
+pub use bool_wide::*;
+pub use bvec::*;
 pub use mat::*;
 pub use quat::*;
 #[cfg(feature = "bevy_math")]
@@ -99,6 +103,14 @@ impl_simd_lane_count! {
     (u64x4, 4),
 }
 
+// Mask types
+impl_simd_lane_count! {
+    (boolf32x4, 4),
+    (boolf32x8, 8),
+    (boolf64x2, 2),
+    (boolf64x4, 4),
+}
+
 // Vector types
 #[cfg(feature = "f32")]
 impl_simd_lane_count! {
@@ -106,6 +118,12 @@ impl_simd_lane_count! {
     (Vec2x8, 8),
     (Vec3x4, 4),
     (Vec3x8, 8),
+    (BVec2x4, 4),
+    (BVec2x8, 8),
+    (BVec3x4, 4),
+    (BVec3x8, 8),
+    (BVec4x4, 4),
+    (BVec4x8, 8),
 }
 #[cfg(feature = "f64")]
 impl_simd_lane_count! {
@@ -113,6 +131,12 @@ impl_simd_lane_count! {
     (DVec2x4, 4),
     (DVec3x2, 2),
     (DVec3x4, 4),
+    (BDVec2x2, 2),
+    (BDVec2x4, 4),
+    (BDVec3x2, 2),
+    (BDVec3x4, 4),
+    (BDVec4x2, 2),
+    (BDVec4x4, 4),
 }
 
 // 2D rotation types

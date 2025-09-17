@@ -1,15 +1,15 @@
 use core::ops::*;
 use glam::{DVec2, Vec2};
-use wide::{CmpGt, f32x4, f32x8, f64x2, f64x4};
+use wide::{CmpEq, CmpGe, CmpGt, CmpLe, CmpLt, CmpNe, f32x4, f32x8, f64x2, f64x4};
 
 use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
-use crate::{DVec3x2, DVec3x4};
+use crate::{BDVec2x2, BDVec2x4, DVec3x2, DVec3x4, boolf64x2, boolf64x4};
 #[cfg(feature = "f32")]
-use crate::{Vec3x4, Vec3x8};
+use crate::{BVec2x4, BVec2x8, Vec3x4, Vec3x8, boolf32x4, boolf32x8};
 
 macro_rules! wide_vec2s {
-    ($(($nonwiden:ident, $n:ident, $v3t:ident) => ($nonwidet:ident, $t:ident)),+) => {
+    ($(($nonwiden:ident, $n:ident, $v3t:ident, $bvt:ident) => ($nonwidet:ident, $t:ident, $bool:ident)),+) => {
         $(
         /// A 2-dimensional wide vector.
         #[derive(Clone, Copy, Debug, Default)]
@@ -97,10 +97,10 @@ macro_rules! wide_vec2s {
             /// where there is a 0 bit in `mask`, the output will put the bit from `if_false`.
             #[inline]
             #[must_use]
-            pub fn blend(mask: $t, if_true: Self, if_false: Self) -> Self {
+            pub fn blend(mask: $bool, if_true: Self, if_false: Self) -> Self {
                 Self {
-                    x: mask.blend(if_true.x, if_false.x),
-                    y: mask.blend(if_true.y, if_false.y),
+                    x: mask.to_raw().blend(if_true.x, if_false.x),
+                    y: mask.to_raw().blend(if_true.y, if_false.y),
                 }
             }
 
@@ -112,6 +112,20 @@ macro_rules! wide_vec2s {
                 F: Fn($t) -> $t,
             {
                 Self::new(f(self.x), f(self.y))
+            }
+
+            /// Creates a vector from the elements in `if_true` and `if_false`, selecting which to use
+            /// for each element of `self`.
+            ///
+            /// A true element in the mask uses the corresponding element from `if_true`, and false
+            /// uses the element from `if_false`.
+            #[inline]
+            #[must_use]
+            pub fn select(mask: $bvt, if_true: Self, if_false: Self) -> Self {
+                Self {
+                    x: mask.test(0).to_raw().blend(if_true.x, if_false.x),
+                    y: mask.test(1).to_raw().blend(if_true.y, if_false.y),
+                }
             }
 
             /// Creates a new vector from an array.
@@ -260,6 +274,108 @@ macro_rules! wide_vec2s {
                 self.x.max(self.y)
             }
 
+            /// Returns the sum of all elements of `self`.
+            ///
+            /// In other words, this computes `self.x + self.y + ..`.
+            #[inline]
+            #[must_use]
+            pub fn element_sum(self) -> $t {
+                self.x + self.y
+            }
+
+            /// Returns the product of all elements of `self`.
+            ///
+            /// In other words, this computes `self.x * self.y * ..`.
+            #[inline]
+            #[must_use]
+            pub fn element_product(self) -> $t {
+                self.x * self.y
+            }
+
+            /// Returns a vector mask containing the result of a `==` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words, this computes `[self.x == rhs.x, self.y == rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmpeq(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_eq(rhs.x)),
+                    $bool::from_raw(self.y.cmp_eq(rhs.y)),
+                )
+            }
+
+            /// Returns a vector mask containing the result of a `!=` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words this computes `[self.x != rhs.x, self.y != rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmpne(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_ne(rhs.x)),
+                    $bool::from_raw(self.y.cmp_ne(rhs.y)),
+                )
+            }
+
+            /// Returns a vector mask containing the result of a `>=` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words this computes `[self.x >= rhs.x, self.y >= rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmpge(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_ge(rhs.x)),
+                    $bool::from_raw(self.y.cmp_ge(rhs.y)),
+                )
+            }
+
+            /// Returns a vector mask containing the result of a `>` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words this computes `[self.x > rhs.x, self.y > rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmpgt(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_gt(rhs.x)),
+                    $bool::from_raw(self.y.cmp_gt(rhs.y)),
+                )
+            }
+
+            /// Returns a vector mask containing the result of a `<=` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words this computes `[self.x <= rhs.x, self.y <= rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmple(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_le(rhs.x)),
+                    $bool::from_raw(self.y.cmp_le(rhs.y)),
+                )
+            }
+
+            /// Returns a vector mask containing the result of a `<` comparison for each element of
+            /// `self` and `rhs`.
+            ///
+            /// In other words this computes `[self.x < rhs.x, self.y < rhs.y, ..]` for all
+            /// elements.
+            #[inline]
+            #[must_use]
+            pub fn cmplt(self, rhs: Self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.cmp_lt(rhs.x)),
+                    $bool::from_raw(self.y.cmp_lt(rhs.y)),
+                )
+            }
+
             /// Returns a vector containing the absolute value of each element of `self`.
             #[inline]
             #[must_use]
@@ -272,6 +388,45 @@ macro_rules! wide_vec2s {
             #[must_use]
             pub fn copysign(self, rhs: Self) -> Self {
                 Self::new(self.x.copysign(rhs.x), self.y.copysign(rhs.y))
+            }
+
+            /// Returns `true` if, and only if, all elements are finite.  If any element is either
+            /// `NaN`, positive or negative infinity, this will return `false`.
+            #[inline]
+            #[must_use]
+            pub fn is_finite(self) -> $bool {
+                $bool::from_raw(self.x.is_finite()) & $bool::from_raw(self.y.is_finite())
+            }
+
+            /// Performs `is_finite` on each element of self, returning a vector mask of the results.
+            ///
+            /// In other words, this computes `[x.is_finite(), y.is_finite(), ...]`.
+            #[inline]
+            #[must_use]
+            pub fn is_finite_mask(self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.is_finite()),
+                    $bool::from_raw(self.y.is_finite()),
+                )
+            }
+
+            /// Returns `true` if any elements are `NaN`.
+            #[inline]
+            #[must_use]
+            pub fn is_nan(self) -> $bool {
+                $bool::from_raw(self.x.is_nan()) | $bool::from_raw(self.y.is_nan())
+            }
+
+            /// Performs `is_nan` on each element of self, returning a vector mask of the results.
+            ///
+            /// In other words, this computes `[x.is_nan(), y.is_nan(), ...]`.
+            #[inline]
+            #[must_use]
+            pub fn is_nan_mask(self) -> $bvt {
+                $bvt::new(
+                    $bool::from_raw(self.x.is_nan()),
+                    $bool::from_raw(self.y.is_nan()),
+                )
             }
 
             /// Computes the length of `self`.
@@ -320,6 +475,57 @@ macro_rules! wide_vec2s {
             #[must_use]
             pub fn normalize(self) -> Self {
                 self.mul(self.length_recip())
+            }
+
+            /// Returns `self` normalized to length 1.0 if possible, else returns a
+            /// fallback value.
+            ///
+            /// In particular, if the input is zero (or very close to zero), or non-finite,
+            /// the result of this operation will be the fallback value.
+            ///
+            /// See also [`Self::try_normalize()`].
+            #[inline]
+            #[must_use]
+            pub fn normalize_or(self, fallback: Self) -> Self {
+                let rcp = self.length_recip();
+                let mask = $bool::from_raw(rcp.is_finite() & rcp.cmp_gt($t::ZERO));
+                Self::blend(mask, self * rcp, fallback)
+            }
+
+            /// Returns `self` normalized to length 1.0 if possible, else returns zero.
+            ///
+            /// In particular, if the input is zero (or very close to zero), or non-finite,
+            /// the result of this operation will be zero.
+            ///
+            /// See also [`Self::try_normalize()`].
+            #[inline]
+            #[must_use]
+            pub fn normalize_or_zero(self) -> Self {
+                self.normalize_or(Self::ZERO)
+            }
+
+            /// Returns `self` normalized to length 1.0 and the length of `self`.
+            ///
+            /// If `self` is zero length then `(Self::X, 0.0)` is returned.
+            #[inline]
+            #[must_use]
+            pub fn normalize_and_length(self) -> (Self, $t) {
+                let length = self.length();
+                let rcp = $t::ONE / length;
+                let mask = $bool::from_raw(rcp.is_finite() & rcp.cmp_gt($t::ZERO));
+                (
+                    Self::blend(mask, self * rcp, Self::X),
+                    $t::blend(mask.to_raw(), length, $t::ZERO),
+                )
+            }
+
+            /// Returns whether `self` is length `1.0` or not.
+            ///
+            /// Uses a precision threshold of approximately `1e-4`.
+            #[inline]
+            #[must_use]
+            pub fn is_normalized(self) -> $bool {
+                $bool::from_raw((self.length_squared() - 1.0).abs().cmp_le($t::splat(2e-4)))
             }
 
             /// Returns the vector projection of `self` onto `rhs`.
@@ -406,6 +612,31 @@ macro_rules! wide_vec2s {
                 self * ($t::ONE - s) + rhs * s
             }
 
+            /// Calculates the midpoint between `self` and `rhs`.
+            ///
+            /// The midpoint is the average of, or halfway point between, two vectors.
+            /// `a.midpoint(b)` should yield the same result as `a.lerp(b, 0.5)`
+            /// while being slightly cheaper to compute.
+            #[inline]
+            pub fn midpoint(self, rhs: Self) -> Self {
+                (self + rhs) * $t::splat(0.5)
+            }
+
+            /// Returns true if the absolute difference of all elements between `self` and `rhs` is
+            /// less than or equal to `max_abs_diff`.
+            ///
+            /// This can be used to compare if two vectors contain similar elements. It works best when
+            /// comparing with a known value. The `max_abs_diff` that should be used used depends on
+            /// the values being compared against.
+            ///
+            /// For more see
+            /// [comparing floating point numbers](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/).
+            #[inline]
+            #[must_use]
+            pub fn abs_diff_eq(self, rhs: Self, max_abs_diff: $t) -> $bool {
+                self.sub(rhs).abs().cmple(Self::new(max_abs_diff, max_abs_diff)).all()
+            }
+
             /// Fused multiply-add. Computes `(self * a) + b` element-wise with only one rounding
             /// error, yielding a more accurate result than an unfused multiply-add.
             ///
@@ -444,7 +675,7 @@ macro_rules! wide_vec2s {
                 let ndi = n.dot(self);
 
                 let k = one - eta * eta * (one - ndi * ndi);
-                let mask = k.cmp_gt($t::splat(0.0));
+                let mask = $bool::from_raw(k.cmp_gt($t::splat(0.0)));
 
                 let out = self * eta - (eta * ndi + k.sqrt()) * n;
 
@@ -797,12 +1028,12 @@ impl From<[DVec2; 4]> for DVec2x4 {
 
 #[cfg(feature = "f32")]
 wide_vec2s!(
-    (Vec2, Vec2x4, Vec3x4) => (f32, f32x4),
-    (Vec2, Vec2x8, Vec3x8) => (f32, f32x8)
+    (Vec2, Vec2x4, Vec3x4, BVec2x4) => (f32, f32x4, boolf32x4),
+    (Vec2, Vec2x8, Vec3x8, BVec2x8) => (f32, f32x8, boolf32x8)
 );
 
 #[cfg(feature = "f64")]
 wide_vec2s!(
-    (DVec2, DVec2x2, DVec3x2) => (f64, f64x2),
-    (DVec2, DVec2x4, DVec3x4) => (f64, f64x4)
+    (DVec2, DVec2x2, DVec3x2, BDVec2x2) => (f64, f64x2, boolf64x2),
+    (DVec2, DVec2x4, DVec3x4, BDVec2x4) => (f64, f64x4, boolf64x4)
 );
