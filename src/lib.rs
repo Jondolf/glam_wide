@@ -3,6 +3,7 @@
 #![warn(missing_docs)]
 
 mod bool_wide;
+mod bvec;
 mod mat;
 mod quat;
 #[cfg(feature = "bevy_math")]
@@ -10,6 +11,7 @@ mod rot2;
 mod vec;
 
 pub use bool_wide::*;
+pub use bvec::*;
 pub use mat::*;
 pub use quat::*;
 #[cfg(feature = "bevy_math")]
