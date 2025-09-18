@@ -8,6 +8,7 @@ mod mat;
 mod quat;
 #[cfg(feature = "bevy_math")]
 mod rot2;
+mod swizzles;
 mod vec;
 
 pub use bool_wide::*;
