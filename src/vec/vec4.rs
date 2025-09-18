@@ -188,35 +188,35 @@ macro_rules! wide_vec4s {
                 slice[..4].copy_from_slice(&self.to_array());
             }
 
-            /// Creates a 2D vector from the `x` and `y` elements of `self`, discarding `z`.
+            /// Creates a 3D vector from the `x` and `y` elements of `self`, discarding `z`.
             #[inline]
             #[must_use]
             pub const fn truncate(self) -> $v3t {
                 $v3t::new(self.x, self.y, self.z)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `x`.
+            /// Creates a 4D vector from `self` with the given value of `x`.
             #[inline]
             #[must_use]
             pub const fn with_x(self, x: $t) -> Self {
                 Self::new(x, self.y, self.z, self.w)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `y`.
+            /// Creates a 4D vector from `self` with the given value of `y`.
             #[inline]
             #[must_use]
             pub const fn with_y(self, y: $t) -> Self {
                 Self::new(self.x, y, self.z, self.w)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `z`.
+            /// Creates a 4D vector from `self` with the given value of `z`.
             #[inline]
             #[must_use]
             pub const fn with_z(self, z: $t) -> Self {
                 Self::new(self.x, self.y, z, self.w)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `w`.
+            /// Creates a 4D vector from `self` with the given value of `w`.
             #[inline]
             #[must_use]
             pub const fn with_w(self, w: $t) -> Self {
