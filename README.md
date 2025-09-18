@@ -43,7 +43,7 @@ The following features are provided by `glam_wide`, or are being actively worked
 - Wide vectors
   - [x] 2D vectors: `Vec2x4`, `Vec2x8`, `DVec2x2`, `DVec2x4`
   - [x] 3D vectors: `Vec3x4`, `Vec3x8`, `DVec3x2`, `DVec3x4`
-  - [ ] 4D vectors: `Vec4x4`, `Vec4x8`, `DVec4x2`, `DVec4x4`
+  - [x] 4D vectors: `Vec4x4`, `Vec4x8`, `DVec4x2`, `DVec4x4`
 - Wide vector masks
   - [x] 2D vector masks: `BVec2x4`, `BVec2x8`, `BDVec2x2`, `BDVec2x4`
   - [x] 3D vector masks: `BVec3x4`, `BVec3x8`, `BDVec3x2`, `BDVec3x4`
