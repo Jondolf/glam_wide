@@ -9,7 +9,7 @@ use crate::{BDVec2x2, BDVec2x4, DVec3x2, DVec3x4, boolf64x2, boolf64x4};
 use crate::{BVec2x4, BVec2x8, Vec3x4, Vec3x8, boolf32x4, boolf32x8};
 
 macro_rules! wide_vec2s {
-    ($(($nonwiden:ident, $n:ident, $v3t:ident, $bvt:ident) => ($nonwidet:ident, $t:ident, $bool:ident)),+) => {
+    ($(($nonwiden:ident, $n:ident, $v3t:ident, $bvt:ident) => ($nonwidet:ident, $t:ident, $bool:ident, $pow:ident)),+) => {
         $(
         /// A 2-dimensional wide vector.
         #[derive(Clone, Copy, Debug, Default)]
@@ -87,6 +87,16 @@ macro_rules! wide_vec2s {
                 Self {
                     x: $t::new([v.x; $t::LANES]),
                     y: $t::new([v.y; $t::LANES]),
+                }
+            }
+
+            /// Creates a new vector with all components set to `f`.
+            #[inline]
+            #[must_use]
+            pub const fn broadcast(f: $t) -> Self {
+                Self {
+                    x: f,
+                    y: f,
                 }
             }
 
@@ -594,6 +604,36 @@ macro_rules! wide_vec2s {
                 Self::new(self.x.ceil(), self.y.ceil())
             }
 
+            /// Returns a vector containing the fractional part of the vector as `self - self.floor()`.
+            ///
+            /// Note that this differs from the Rust implementation of `fract` which returns
+            /// `self - self.trunc()`.
+            ///
+            /// Note that this is fast but not precise for large numbers.
+            #[inline]
+            #[must_use]
+            pub fn fract_gl(self) -> Self {
+                self - self.floor()
+            }
+
+            /// Returns a vector containing `e^self` (the exponential function) for each element of
+            /// `self`.
+            #[inline]
+            #[must_use]
+            pub fn exp(self) -> Self {
+                Self::new(self.x.exp(), self.y.exp())
+            }
+
+            /// Returns a vector containing each element of `self` raised to the power of `n`.
+            #[inline]
+            #[must_use]
+            pub fn powf(self, n: $t) -> Self {
+                Self::new(
+                    self.x.$pow(n),
+                    self.y.$pow(n),
+                )
+            }
+
             /// Returns a vector containing the reciprocal `1.0 / n` of each element of `self`.
             #[inline]
             #[must_use]
@@ -1028,12 +1068,12 @@ impl From<[DVec2; 4]> for DVec2x4 {
 
 #[cfg(feature = "f32")]
 wide_vec2s!(
-    (Vec2, Vec2x4, Vec3x4, BVec2x4) => (f32, f32x4, boolf32x4),
-    (Vec2, Vec2x8, Vec3x8, BVec2x8) => (f32, f32x8, boolf32x8)
+    (Vec2, Vec2x4, Vec3x4, BVec2x4) => (f32, f32x4, boolf32x4, pow_f32x4),
+    (Vec2, Vec2x8, Vec3x8, BVec2x8) => (f32, f32x8, boolf32x8, pow_f32x8)
 );
 
 #[cfg(feature = "f64")]
 wide_vec2s!(
-    (DVec2, DVec2x2, DVec3x2, BDVec2x2) => (f64, f64x2, boolf64x2),
-    (DVec2, DVec2x4, DVec3x4, BDVec2x4) => (f64, f64x4, boolf64x4)
+    (DVec2, DVec2x2, DVec3x2, BDVec2x2) => (f64, f64x2, boolf64x2, pow_f64x2),
+    (DVec2, DVec2x4, DVec3x4, BDVec2x4) => (f64, f64x4, boolf64x4, pow_f64x4)
 );
