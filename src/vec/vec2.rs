@@ -174,14 +174,14 @@ macro_rules! wide_vec2s {
             /// Creates a 2D vector from `self` with the given value of `x`.
             #[inline]
             #[must_use]
-            pub fn with_x(self, x: $t) -> Self {
+            pub const fn with_x(self, x: $t) -> Self {
                 Self::new(x, self.y)
             }
 
             /// Creates a 2D vector from `self` with the given value of `y`.
             #[inline]
             #[must_use]
-            pub fn with_y(self, y: $t) -> Self {
+            pub const fn with_y(self, y: $t) -> Self {
                 Self::new(self.x, y)
             }
 

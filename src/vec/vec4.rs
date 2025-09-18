@@ -1,17 +1,17 @@
 use core::ops::*;
-use glam::{DVec3, Vec3};
+use glam::{DVec4, Vec4};
 use wide::{CmpEq, CmpGe, CmpGt, CmpLe, CmpLt, CmpNe, f32x4, f32x8, f64x2, f64x4};
 
 use crate::SimdLaneCount;
 #[cfg(feature = "f64")]
-use crate::{BDVec3x2, BDVec3x4, DVec2x2, DVec2x4, DVec4x2, DVec4x4, boolf64x2, boolf64x4};
+use crate::{BDVec4x2, BDVec4x4, DVec3x2, DVec3x4, boolf64x2, boolf64x4};
 #[cfg(feature = "f32")]
-use crate::{BVec3x4, BVec3x8, Vec2x4, Vec2x8, Vec4x4, Vec4x8, boolf32x4, boolf32x8};
+use crate::{BVec4x4, BVec4x8, Vec3x4, Vec3x8, boolf32x4, boolf32x8};
 
-macro_rules! wide_vec3s {
-    ($(($v2t:ident, $nonwiden:ident, $n:ident, $v4t:ident, $bvt:ident) => ($nonwidet:ident, $t:ident, $bool:ident)),+) => {
+macro_rules! wide_vec4s {
+    ($(($v3t:ident, $nonwiden:ident, $n:ident, $bvt:ident) => ($nonwidet:ident, $t:ident, $bool:ident)),+) => {
         $(
-        /// A 3-dimensional wide vector.
+        /// A 4-dimensional wide vector.
         #[derive(Clone, Copy, Debug, Default)]
         #[cfg_attr(feature = "bevy_reflect", derive(bevy_reflect::TypePath))]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23,80 +23,90 @@ macro_rules! wide_vec3s {
             pub y: $t,
             /// The Z component of the vector.
             pub z: $t,
+            /// The W component of the vector.
+            pub w: $t,
         }
 
         impl $n {
             /// All zeros.
-            pub const ZERO: Self = Self::new_splat(0.0, 0.0, 0.0);
+            pub const ZERO: Self = Self::new_splat(0.0, 0.0, 0.0, 0.0);
 
             /// All ones.
-            pub const ONE: Self = Self::new_splat(1.0, 1.0, 1.0);
+            pub const ONE: Self = Self::new_splat(1.0, 1.0, 1.0, 1.0);
 
             /// All negative ones.
-            pub const NEG_ONE: Self = Self::new_splat(-1.0, -1.0, -1.0);
+            pub const NEG_ONE: Self = Self::new_splat(-1.0, -1.0, -1.0, -1.0);
 
             /// All `MIN`.
-            pub const MIN: Self = Self::new_splat($nonwidet::MIN, $nonwidet::MIN, $nonwidet::MIN);
+            pub const MIN: Self = Self::new_splat($nonwidet::MIN, $nonwidet::MIN, $nonwidet::MIN, $nonwidet::MIN);
 
             /// All `MAX`.
-            pub const MAX: Self = Self::new_splat($nonwidet::MAX, $nonwidet::MAX, $nonwidet::MAX);
+            pub const MAX: Self = Self::new_splat($nonwidet::MAX, $nonwidet::MAX, $nonwidet::MAX, $nonwidet::MAX);
 
             /// All `NAN`.
-            pub const NAN: Self = Self::new_splat($nonwidet::NAN, $nonwidet::NAN, $nonwidet::NAN);
+            pub const NAN: Self = Self::new_splat($nonwidet::NAN, $nonwidet::NAN, $nonwidet::NAN, $nonwidet::NAN);
 
             /// All `INFINITY`.
-            pub const INFINITY: Self = Self::new_splat($nonwidet::INFINITY, $nonwidet::INFINITY, $nonwidet::INFINITY);
+            pub const INFINITY: Self = Self::new_splat($nonwidet::INFINITY, $nonwidet::INFINITY, $nonwidet::INFINITY, $nonwidet::INFINITY);
 
             /// All `NEG_INFINITY`.
-            pub const NEG_INFINITY: Self = Self::new_splat($nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY);
+            pub const NEG_INFINITY: Self = Self::new_splat($nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY, $nonwidet::NEG_INFINITY);
 
             /// A unit vector pointing along the positive X axis.
-            pub const X: Self = Self::new_splat(1.0, 0.0, 0.0);
+            pub const X: Self = Self::new_splat(1.0, 0.0, 0.0, 0.0);
 
             /// A unit vector pointing along the negative X axis.
-            pub const NEG_X: Self = Self::new_splat(-1.0, 0.0, 0.0);
+            pub const NEG_X: Self = Self::new_splat(-1.0, 0.0, 0.0, 0.0);
 
             /// A unit vector pointing along the positive Y axis.
-            pub const Y: Self = Self::new_splat(0.0, 1.0, 0.0);
+            pub const Y: Self = Self::new_splat(0.0, 1.0, 0.0, 0.0);
 
             /// A unit vector pointing along the negative Y axis.
-            pub const NEG_Y: Self = Self::new_splat(0.0, -1.0, 0.0);
+            pub const NEG_Y: Self = Self::new_splat(0.0, -1.0, 0.0, 0.0);
 
             /// A unit vector pointing along the positive Z axis.
-            pub const Z: Self = Self::new_splat(0.0, 0.0, 1.0);
+            pub const Z: Self = Self::new_splat(0.0, 0.0, 1.0, 0.0);
 
             /// A unit vector pointing along the negative Z axis.
-            pub const NEG_Z: Self = Self::new_splat(0.0, 0.0, -1.0);
+            pub const NEG_Z: Self = Self::new_splat(0.0, 0.0, -1.0, 0.0);
+
+            /// A unit vector pointing along the positive W axis.
+            pub const W: Self = Self::new_splat(0.0, 0.0, 0.0, 1.0);
+
+            /// A unit vector pointing along the negative W axis.
+            pub const NEG_W: Self = Self::new_splat(0.0, 0.0, 0.0, -1.0);
 
             /// The unit axes.
-            pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
+            pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
 
             /// Creates a new vector.
             #[inline(always)]
             #[must_use]
-            pub const fn new(x: $t, y: $t, z: $t) -> Self {
-                Self { x, y, z }
+            pub const fn new(x: $t, y: $t, z: $t, w: $t) -> Self {
+                Self { x, y, z, w }
             }
 
-            /// Creates a new vector with all lanes set to the same `x`, `y`, and `z` values.
+            /// Creates a new vector with all lanes set to the same `x`, `y`, `z`, and `w` values.
             #[inline]
             #[must_use]
-            pub const fn new_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet) -> Self {
+            pub const fn new_splat(x: $nonwidet, y: $nonwidet, z: $nonwidet, w: $nonwidet) -> Self {
                 Self {
                     x: $t::new([x; $t::LANES]),
                     y: $t::new([y; $t::LANES]),
                     z: $t::new([z; $t::LANES]),
+                    w: $t::new([w; $t::LANES]),
                 }
             }
 
             /// Creates a new vector with all lanes set to `v`.
             #[inline]
             #[must_use]
-            pub const fn splat(v: $nonwiden) -> Self {
+            pub fn splat(v: $nonwiden) -> Self {
                 Self {
                     x: $t::new([v.x; $t::LANES]),
                     y: $t::new([v.y; $t::LANES]),
                     z: $t::new([v.z; $t::LANES]),
+                    w: $t::new([v.w; $t::LANES]),
                 }
             }
 
@@ -112,6 +122,7 @@ macro_rules! wide_vec3s {
                     x: mask.to_raw().blend(if_true.x, if_false.x),
                     y: mask.to_raw().blend(if_true.y, if_false.y),
                     z: mask.to_raw().blend(if_true.z, if_false.z),
+                    w: mask.to_raw().blend(if_true.w, if_false.w),
                 }
             }
 
@@ -122,7 +133,7 @@ macro_rules! wide_vec3s {
             where
                 F: Fn($t) -> $t,
             {
-                Self::new(f(self.x), f(self.y), f(self.z))
+                Self::new(f(self.x), f(self.y), f(self.z), f(self.w))
             }
 
             /// Creates a vector from the elements in `if_true` and `if_false`, selecting which to use
@@ -137,85 +148,86 @@ macro_rules! wide_vec3s {
                     x: mask.test(0).to_raw().blend(if_true.x, if_false.x),
                     y: mask.test(1).to_raw().blend(if_true.y, if_false.y),
                     z: mask.test(2).to_raw().blend(if_true.z, if_false.z),
+                    w: mask.test(3).to_raw().blend(if_true.w, if_false.w),
                 }
             }
 
             /// Creates a new vector from an array.
             #[inline]
             #[must_use]
-            pub const fn from_array(arr: [$t; 3]) -> Self {
-                Self::new(arr[0], arr[1], arr[2])
+            pub const fn from_array(arr: [$t; 4]) -> Self {
+                Self::new(arr[0], arr[1], arr[2], arr[3])
             }
 
             /// Returns the vector as an array.
             #[inline]
             #[must_use]
-            pub const fn to_array(self) -> [$t; 3] {
-                [self.x, self.y, self.z]
+            pub const fn to_array(self) -> [$t; 4] {
+                [self.x, self.y, self.z, self.w]
             }
 
-            /// Creates a vector from the first 3 values in `slice`.
+            /// Creates a vector from the first 4 values in `slice`.
             ///
             /// # Panics
             ///
-            /// Panics if `slice` is less than 3 elements long.
+            /// Panics if `slice` is less than 4 elements long.
             #[inline]
             #[must_use]
             pub const fn from_slice(slice: &[$t]) -> Self {
-                assert!(slice.len() == 3);
-                Self::new(slice[0], slice[1], slice[2])
+                assert!(slice.len() == 4);
+                Self::new(slice[0], slice[1], slice[2], slice[3])
             }
 
-            /// Writes the elements of `self` to the first 3 elements in `slice`.
+            /// Writes the elements of `self` to the first 4 elements in `slice`.
             ///
             /// # Panics
             ///
-            /// Panics if `slice` is less than 3 elements long.
+            /// Panics if `slice` is less than 4 elements long.
             #[inline]
             pub fn write_to_slice(self, slice: &mut [$t]) {
-                slice[..3].copy_from_slice(&self.to_array());
+                slice[..4].copy_from_slice(&self.to_array());
             }
 
-            /// Creates a 4D vector from `self` and the given `w` value.
+            /// Creates a 3D vector from the `x` and `y` elements of `self`, discarding `z`.
             #[inline]
             #[must_use]
-            pub const fn extend(self, w: $t) -> $v4t {
-                $v4t::new(self.x, self.y, self.z, w)
+            pub const fn truncate(self) -> $v3t {
+                $v3t::new(self.x, self.y, self.z)
             }
 
-            /// Creates a 2D vector from the `x` and `y` elements of `self`, discarding `z`.
-            #[inline]
-            #[must_use]
-            pub const fn truncate(self) -> $v2t {
-                $v2t::new(self.x, self.y)
-            }
-
-            /// Creates a 3D vector from `self` with the given value of `x`.
+            /// Creates a 4D vector from `self` with the given value of `x`.
             #[inline]
             #[must_use]
             pub const fn with_x(self, x: $t) -> Self {
-                Self::new(x, self.y, self.z)
+                Self::new(x, self.y, self.z, self.w)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `y`.
+            /// Creates a 4D vector from `self` with the given value of `y`.
             #[inline]
             #[must_use]
             pub const fn with_y(self, y: $t) -> Self {
-                Self::new(self.x, y, self.z)
+                Self::new(self.x, y, self.z, self.w)
             }
 
-            /// Creates a 3D vector from `self` with the given value of `z`.
+            /// Creates a 4D vector from `self` with the given value of `z`.
             #[inline]
             #[must_use]
             pub const fn with_z(self, z: $t) -> Self {
-                Self::new(self.x, self.y, z)
+                Self::new(self.x, self.y, z, self.w)
+            }
+
+            /// Creates a 4D vector from `self` with the given value of `w`.
+            #[inline]
+            #[must_use]
+            pub const fn with_w(self, w: $t) -> Self {
+                Self::new(self.x, self.y, self.z, w)
             }
 
             /// Computes the dot product of `self` and `rhs`.
             #[inline]
             #[must_use]
             pub fn dot(self, rhs: Self) -> $t {
-                self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+                self.x * rhs.x + self.y * rhs.y + self.z * rhs.z + self.w * rhs.w
             }
 
             /// Returns a vector where every component is the dot product of `self` and `rhs`.
@@ -223,18 +235,7 @@ macro_rules! wide_vec3s {
             #[must_use]
             pub fn dot_into_vec(self, rhs: Self) -> Self {
                 let dot = self.dot(rhs);
-                Self::new(dot, dot, dot)
-            }
-
-            /// Computes the cross product of `self` and `rhs`.
-            #[inline]
-            #[must_use]
-            pub fn cross(self, rhs: Self) -> Self {
-                Self::new(
-                    self.y * rhs.z - self.z * rhs.y,
-                    self.z * rhs.x - self.x * rhs.z,
-                    self.x * rhs.y - self.y * rhs.x,
-                )
+                Self::new(dot, dot, dot, dot)
             }
 
             /// Returns a vector containing the minimum values for each element of `self` and `rhs`.
@@ -243,7 +244,12 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn min(self, rhs: Self) -> Self {
-                Self::new(self.x.min(rhs.x), self.y.min(rhs.y), self.z.min(rhs.z))
+                Self::new(
+                    self.x.min(rhs.x),
+                    self.y.min(rhs.y),
+                    self.z.min(rhs.z),
+                    self.w.min(rhs.w),
+                )
             }
 
             /// Returns a vector containing the maximum values for each element of `self` and `rhs`.
@@ -252,7 +258,12 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn max(self, rhs: Self) -> Self {
-                Self::new(self.x.max(rhs.x), self.y.max(rhs.y), self.z.max(rhs.z))
+                Self::new(
+                    self.x.max(rhs.x),
+                    self.y.max(rhs.y),
+                    self.z.max(rhs.z),
+                    self.w.max(rhs.w),
+                )
             }
 
             /// Component-wise clamping of values.
@@ -264,6 +275,7 @@ macro_rules! wide_vec3s {
                 self.x = self.x.max(min.x).min(max.x);
                 self.y = self.y.max(min.y).min(max.y);
                 self.z = self.z.max(min.z).min(max.z);
+                self.w = self.w.max(min.w).min(max.w);
                 self
             }
 
@@ -273,7 +285,7 @@ macro_rules! wide_vec3s {
             pub fn clamp_length(self, min: $t, max: $t) -> Self {
                 let length = self.length();
                 let scale = (min / length).max($t::ONE).min(max / length);
-                Self::new(self.x * scale, self.y * scale, self.z * scale)
+                Self::new(self.x * scale, self.y * scale, self.z * scale, self.w * scale)
             }
 
             /// Returns a vector with a length no less than `min`.
@@ -282,7 +294,7 @@ macro_rules! wide_vec3s {
             pub fn clamp_length_min(self, min: $t) -> Self {
                 let length = self.length();
                 let scale = (min / length).max($t::ONE);
-                Self::new(self.x * scale, self.y * scale, self.z * scale)
+                Self::new(self.x * scale, self.y * scale, self.z * scale, self.w * scale)
             }
 
             /// Returns a vector with a length no more than `max`.
@@ -291,7 +303,7 @@ macro_rules! wide_vec3s {
             pub fn clamp_length_max(self, max: $t) -> Self {
                 let length = self.length();
                 let scale = (max / length).min($t::ONE);
-                Self::new(self.x * scale, self.y * scale, self.z * scale)
+                Self::new(self.x * scale, self.y * scale, self.z * scale, self.w * scale)
             }
 
             /// Returns the horizontal minimum of `self`.
@@ -300,7 +312,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn min_element(self) -> $t {
-                self.x.min(self.y).min(self.z)
+                self.x.min(self.y).min(self.z).min(self.w)
             }
 
             /// Returns the horizontal maximum of `self`.
@@ -309,7 +321,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn max_element(self) -> $t {
-                self.x.max(self.y).max(self.z)
+                self.x.max(self.y).max(self.z).max(self.w)
             }
 
             /// Returns the sum of all elements of `self`.
@@ -318,7 +330,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn element_sum(self) -> $t {
-                self.x + self.y + self.z
+                self.x + self.y + self.z + self.w
             }
 
             /// Returns the product of all elements of `self`.
@@ -327,7 +339,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn element_product(self) -> $t {
-                self.x * self.y * self.z
+                self.x * self.y * self.z * self.w
             }
 
             /// Returns a vector mask containing the result of a `==` comparison for each element of
@@ -342,6 +354,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_eq(rhs.x)),
                     $bool::from_raw(self.y.cmp_eq(rhs.y)),
                     $bool::from_raw(self.z.cmp_eq(rhs.z)),
+                    $bool::from_raw(self.w.cmp_eq(rhs.w)),
                 )
             }
 
@@ -357,6 +370,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_ne(rhs.x)),
                     $bool::from_raw(self.y.cmp_ne(rhs.y)),
                     $bool::from_raw(self.z.cmp_ne(rhs.z)),
+                    $bool::from_raw(self.w.cmp_ne(rhs.w)),
                 )
             }
 
@@ -372,6 +386,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_ge(rhs.x)),
                     $bool::from_raw(self.y.cmp_ge(rhs.y)),
                     $bool::from_raw(self.z.cmp_ge(rhs.z)),
+                    $bool::from_raw(self.w.cmp_ge(rhs.w)),
                 )
             }
 
@@ -387,6 +402,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_gt(rhs.x)),
                     $bool::from_raw(self.y.cmp_gt(rhs.y)),
                     $bool::from_raw(self.z.cmp_gt(rhs.z)),
+                    $bool::from_raw(self.w.cmp_gt(rhs.w)),
                 )
             }
 
@@ -402,6 +418,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_le(rhs.x)),
                     $bool::from_raw(self.y.cmp_le(rhs.y)),
                     $bool::from_raw(self.z.cmp_le(rhs.z)),
+                    $bool::from_raw(self.w.cmp_le(rhs.w)),
                 )
             }
 
@@ -417,6 +434,7 @@ macro_rules! wide_vec3s {
                     $bool::from_raw(self.x.cmp_lt(rhs.x)),
                     $bool::from_raw(self.y.cmp_lt(rhs.y)),
                     $bool::from_raw(self.z.cmp_lt(rhs.z)),
+                    $bool::from_raw(self.w.cmp_lt(rhs.w)),
                 )
             }
 
@@ -424,14 +442,19 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn abs(self) -> Self {
-                Self::new(self.x.abs(), self.y.abs(), self.z.abs())
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
             }
 
             /// Returns a vector with signs of `rhs` and the magnitudes of `self`.
             #[inline]
             #[must_use]
             pub fn copysign(self, rhs: Self) -> Self {
-                Self::new(self.x.copysign(rhs.x), self.y.copysign(rhs.y), self.z.copysign(rhs.z))
+                Self::new(
+                    self.x.copysign(rhs.x),
+                    self.y.copysign(rhs.y),
+                    self.z.copysign(rhs.z),
+                    self.w.copysign(rhs.w),
+                )
             }
 
             /// Returns `true` if, and only if, all elements are finite.  If any element is either
@@ -442,6 +465,7 @@ macro_rules! wide_vec3s {
                 $bool::from_raw(self.x.is_finite())
                     & $bool::from_raw(self.y.is_finite())
                     & $bool::from_raw(self.z.is_finite())
+                    & $bool::from_raw(self.w.is_finite())
             }
 
             /// Performs `is_finite` on each element of self, returning a vector mask of the results.
@@ -453,7 +477,8 @@ macro_rules! wide_vec3s {
                 $bvt::new(
                     $bool::from_raw(self.x.is_finite()),
                     $bool::from_raw(self.y.is_finite()),
-                    $bool::from_raw(self.z.is_finite())
+                    $bool::from_raw(self.z.is_finite()),
+                    $bool::from_raw(self.w.is_finite())
                 )
             }
 
@@ -464,6 +489,7 @@ macro_rules! wide_vec3s {
                 $bool::from_raw(self.x.is_nan())
                     | $bool::from_raw(self.y.is_nan())
                     | $bool::from_raw(self.z.is_nan())
+                    | $bool::from_raw(self.w.is_nan())
             }
 
             /// Performs `is_nan` on each element of self, returning a vector mask of the results.
@@ -475,7 +501,8 @@ macro_rules! wide_vec3s {
                 $bvt::new(
                     $bool::from_raw(self.x.is_nan()),
                     $bool::from_raw(self.y.is_nan()),
-                    $bool::from_raw(self.z.is_nan())
+                    $bool::from_raw(self.z.is_nan()),
+                    $bool::from_raw(self.w.is_nan())
                 )
             }
 
@@ -625,7 +652,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn round(self) -> Self {
-                Self::new(self.x.round(), self.y.round(), self.z.round())
+                Self::new(self.x.round(), self.y.round(), self.z.round(), self.w.round())
             }
 
             /// Returns a vector containing the largest integer less than or equal to a number for each
@@ -633,7 +660,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn floor(self) -> Self {
-                Self::new(self.x.floor(), self.y.floor(), self.z.floor())
+                Self::new(self.x.floor(), self.y.floor(), self.z.floor(), self.w.floor())
             }
 
             /// Returns a vector containing the smallest integer greater than or equal to a number for
@@ -641,14 +668,14 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn ceil(self) -> Self {
-                Self::new(self.x.ceil(), self.y.ceil(), self.z.ceil())
+                Self::new(self.x.ceil(), self.y.ceil(), self.z.ceil(), self.w.ceil())
             }
 
             /// Returns a vector containing the reciprocal `1.0 / n` of each element of `self`.
             #[inline]
             #[must_use]
             pub fn recip(self) -> Self {
-                Self::new($t::ONE / self.x, $t::ONE / self.y, $t::ONE / self.z)
+                Self::new($t::ONE / self.x, $t::ONE / self.y, $t::ONE / self.z, $t::ONE / self.w)
             }
 
             /// Performs a linear interpolation between `self` and `rhs` based on the value `s`.
@@ -684,7 +711,7 @@ macro_rules! wide_vec3s {
             #[inline]
             #[must_use]
             pub fn abs_diff_eq(self, rhs: Self, max_abs_diff: $t) -> $bool {
-                self.sub(rhs).abs().cmple(Self::new(max_abs_diff, max_abs_diff, max_abs_diff)).all()
+                self.sub(rhs).abs().cmple(Self::new(max_abs_diff, max_abs_diff, max_abs_diff, max_abs_diff)).all()
             }
 
             /// Fused multiply-add. Computes `(self * a) + b` element-wise with only one rounding
@@ -701,6 +728,7 @@ macro_rules! wide_vec3s {
                     self.x.mul_add(a.x, b.x),
                     self.y.mul_add(a.y, b.y),
                     self.z.mul_add(a.z, b.z),
+                    self.w.mul_add(a.w, b.w),
                 )
             }
 
@@ -734,52 +762,52 @@ macro_rules! wide_vec3s {
             }
         }
 
-        impl From<$n> for [$t; 3] {
+        impl From<$n> for [$t; 4] {
             #[inline]
             fn from(v: $n) -> Self {
-                [v.x, v.y, v.z]
+                [v.x, v.y, v.z, v.w]
             }
         }
 
-        impl From<[$t; 3]> for $n {
+        impl From<[$t; 4]> for $n {
             #[inline]
-            fn from(comps: [$t; 3]) -> Self {
-                Self::new(comps[0], comps[1], comps[2])
+            fn from(comps: [$t; 4]) -> Self {
+                Self::new(comps[0], comps[1], comps[2], comps[3])
             }
         }
 
-        impl From<&[$t; 3]> for $n {
+        impl From<&[$t; 4]> for $n {
             #[inline]
-            fn from(comps: &[$t; 3]) -> Self {
+            fn from(comps: &[$t; 4]) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<&mut [$t; 3]> for $n {
+        impl From<&mut [$t; 4]> for $n {
             #[inline]
-            fn from(comps: &mut [$t; 3]) -> Self {
+            fn from(comps: &mut [$t; 4]) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<($t, $t, $t)> for $n {
+        impl From<($t, $t, $t, $t)> for $n {
             #[inline]
-            fn from(comps: ($t, $t, $t)) -> Self {
-                Self::new(comps.0, comps.1, comps.2)
+            fn from(comps: ($t, $t, $t, $t)) -> Self {
+                Self::new(comps.0, comps.1, comps.2, comps.3)
             }
         }
 
-        impl From<&($t, $t, $t)> for $n {
+        impl From<&($t, $t, $t, $t)> for $n {
             #[inline]
-            fn from(comps: &($t, $t, $t)) -> Self {
+            fn from(comps: &($t, $t, $t, $t)) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<$n> for ($t, $t, $t) {
+        impl From<$n> for ($t, $t, $t, $t) {
             #[inline]
             fn from(v: $n) -> Self {
-                (v.x, v.y, v.z)
+                (v.x, v.y, v.z, v.w)
             }
         }
 
@@ -787,7 +815,7 @@ macro_rules! wide_vec3s {
             type Output = Self;
             #[inline]
             fn add(self, rhs: $n) -> Self {
-                $n::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+                $n::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z, self.w + rhs.w)
             }
         }
 
@@ -797,6 +825,7 @@ macro_rules! wide_vec3s {
                 self.x += rhs.x;
                 self.y += rhs.y;
                 self.z += rhs.z;
+                self.w += rhs.w;
             }
         }
 
@@ -804,7 +833,7 @@ macro_rules! wide_vec3s {
             type Output = Self;
             #[inline]
             fn sub(self, rhs: $n) -> Self {
-                $n::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+                $n::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w)
             }
         }
 
@@ -814,6 +843,7 @@ macro_rules! wide_vec3s {
                 self.x -= rhs.x;
                 self.y -= rhs.y;
                 self.z -= rhs.z;
+                self.w -= rhs.w;
             }
         }
 
@@ -821,7 +851,7 @@ macro_rules! wide_vec3s {
             type Output = Self;
             #[inline]
             fn mul(self, rhs: $n) -> Self {
-                $n::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
+                $n::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z, self.w * rhs.w)
             }
         }
 
@@ -829,7 +859,7 @@ macro_rules! wide_vec3s {
             type Output = $n;
             #[inline]
             fn mul(self, rhs: $n) -> $n {
-                $n::new(self * rhs.x, self * rhs.y, self * rhs.z)
+                $n::new(self * rhs.x, self * rhs.y, self * rhs.z, self * rhs.w)
             }
         }
 
@@ -837,7 +867,7 @@ macro_rules! wide_vec3s {
             type Output = $n;
             #[inline]
             fn mul(self, rhs: $t) -> $n {
-                $n::new(self.x * rhs, self.y * rhs, self.z * rhs)
+                $n::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w * rhs)
             }
         }
 
@@ -847,6 +877,7 @@ macro_rules! wide_vec3s {
                 self.x *= rhs.x;
                 self.y *= rhs.y;
                 self.z *= rhs.z;
+                self.w *= rhs.w;
             }
         }
 
@@ -856,6 +887,7 @@ macro_rules! wide_vec3s {
                 self.x *= rhs;
                 self.y *= rhs;
                 self.z *= rhs;
+                self.w *= rhs;
             }
         }
 
@@ -863,7 +895,7 @@ macro_rules! wide_vec3s {
             type Output = Self;
             #[inline]
             fn div(self, rhs: $n) -> Self {
-                $n::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z)
+                $n::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z, self.w / rhs.w)
             }
         }
 
@@ -871,7 +903,7 @@ macro_rules! wide_vec3s {
             type Output = $n;
             #[inline]
             fn div(self, rhs: $t) -> $n {
-                $n::new(self.x / rhs, self.y / rhs, self.z / rhs)
+                $n::new(self.x / rhs, self.y / rhs, self.z / rhs, self.w / rhs)
             }
         }
 
@@ -881,6 +913,7 @@ macro_rules! wide_vec3s {
                 self.x /= rhs.x;
                 self.y /= rhs.y;
                 self.z /= rhs.z;
+                self.w /= rhs.w;
             }
         }
 
@@ -890,6 +923,7 @@ macro_rules! wide_vec3s {
                 self.x /= rhs;
                 self.y /= rhs;
                 self.z /= rhs;
+                self.w /= rhs;
             }
         }
 
@@ -909,6 +943,7 @@ macro_rules! wide_vec3s {
                     0 => &self.x,
                     1 => &self.y,
                     2 => &self.z,
+                    3 => &self.w,
                     i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
@@ -920,6 +955,7 @@ macro_rules! wide_vec3s {
                     0 => &mut self.x,
                     1 => &mut self.y,
                     2 => &mut self.z,
+                    3 => &mut self.w,
                     i => panic!("Invalid index {i} for vector of type: {}", core::any::type_name::<$n>()),
                 }
             }
@@ -952,57 +988,60 @@ macro_rules! wide_vec3s {
 }
 
 #[cfg(feature = "f32")]
-impl From<Vec3x4> for [Vec3; 4] {
+impl From<Vec4x4> for [Vec4; 4] {
     #[inline]
-    fn from(v: Vec3x4) -> Self {
+    fn from(v: Vec4x4) -> Self {
         let xs: [f32; 4] = v.x.into();
         let ys: [f32; 4] = v.y.into();
         let zs: [f32; 4] = v.z.into();
+        let ws: [f32; 4] = v.w.into();
         [
-            Vec3::new(xs[0], ys[0], zs[0]),
-            Vec3::new(xs[1], ys[1], zs[1]),
-            Vec3::new(xs[2], ys[2], zs[2]),
-            Vec3::new(xs[3], ys[3], zs[3]),
+            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
+            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
+            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
+            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
         ]
     }
 }
 
 #[cfg(feature = "f32")]
-impl From<[Vec3; 4]> for Vec3x4 {
+impl From<[Vec4; 4]> for Vec4x4 {
     #[inline]
-    fn from(vecs: [Vec3; 4]) -> Self {
+    fn from(vecs: [Vec4; 4]) -> Self {
         Self {
             x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
             z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
+            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
         }
     }
 }
 
 #[cfg(feature = "f32")]
-impl From<Vec3x8> for [Vec3; 8] {
+impl From<Vec4x8> for [Vec4; 8] {
     #[inline]
-    fn from(v: Vec3x8) -> Self {
+    fn from(v: Vec4x8) -> Self {
         let xs: [f32; 8] = v.x.into();
         let ys: [f32; 8] = v.y.into();
         let zs: [f32; 8] = v.z.into();
+        let ws: [f32; 8] = v.w.into();
         [
-            Vec3::new(xs[0], ys[0], zs[0]),
-            Vec3::new(xs[1], ys[1], zs[1]),
-            Vec3::new(xs[2], ys[2], zs[2]),
-            Vec3::new(xs[3], ys[3], zs[3]),
-            Vec3::new(xs[4], ys[4], zs[4]),
-            Vec3::new(xs[5], ys[5], zs[5]),
-            Vec3::new(xs[6], ys[6], zs[6]),
-            Vec3::new(xs[7], ys[7], zs[7]),
+            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
+            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
+            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
+            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
+            Vec4::new(xs[4], ys[4], zs[4], ws[4]),
+            Vec4::new(xs[5], ys[5], zs[5], ws[5]),
+            Vec4::new(xs[6], ys[6], zs[6], ws[6]),
+            Vec4::new(xs[7], ys[7], zs[7], ws[7]),
         ]
     }
 }
 
 #[cfg(feature = "f32")]
-impl From<[Vec3; 8]> for Vec3x8 {
+impl From<[Vec4; 8]> for Vec4x8 {
     #[inline]
-    fn from(vecs: [Vec3; 8]) -> Self {
+    fn from(vecs: [Vec4; 8]) -> Self {
         Self {
             x: f32x8::from([
                 vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
@@ -1016,72 +1055,80 @@ impl From<[Vec3; 8]> for Vec3x8 {
                 vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
                 vecs[7].z,
             ]),
+            w: f32x8::from([
+                vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
+                vecs[7].w,
+            ]),
         }
     }
 }
 
 #[cfg(feature = "f64")]
-impl From<DVec3x2> for [DVec3; 2] {
+impl From<DVec4x2> for [DVec4; 2] {
     #[inline]
-    fn from(v: DVec3x2) -> Self {
+    fn from(v: DVec4x2) -> Self {
         let xs: [f64; 2] = v.x.into();
         let ys: [f64; 2] = v.y.into();
         let zs: [f64; 2] = v.z.into();
+        let ws: [f64; 2] = v.w.into();
         [
-            DVec3::new(xs[0], ys[0], zs[0]),
-            DVec3::new(xs[1], ys[1], zs[1]),
+            DVec4::new(xs[0], ys[0], zs[0], ws[0]),
+            DVec4::new(xs[1], ys[1], zs[1], ws[1]),
         ]
     }
 }
 
 #[cfg(feature = "f64")]
-impl From<[DVec3; 2]> for DVec3x2 {
+impl From<[DVec4; 2]> for DVec4x2 {
     #[inline]
-    fn from(vecs: [DVec3; 2]) -> Self {
+    fn from(vecs: [DVec4; 2]) -> Self {
         Self {
             x: f64x2::from([vecs[0].x, vecs[1].x]),
             y: f64x2::from([vecs[0].y, vecs[1].y]),
             z: f64x2::from([vecs[0].z, vecs[1].z]),
+            w: f64x2::from([vecs[0].w, vecs[1].w]),
         }
     }
 }
 
 #[cfg(feature = "f64")]
-impl From<DVec3x4> for [DVec3; 4] {
+impl From<DVec4x4> for [DVec4; 4] {
     #[inline]
-    fn from(v: DVec3x4) -> Self {
+    fn from(v: DVec4x4) -> Self {
         let xs: [f64; 4] = v.x.into();
         let ys: [f64; 4] = v.y.into();
         let zs: [f64; 4] = v.z.into();
+        let ws: [f64; 4] = v.w.into();
         [
-            DVec3::new(xs[0], ys[0], zs[0]),
-            DVec3::new(xs[1], ys[1], zs[1]),
-            DVec3::new(xs[2], ys[2], zs[2]),
-            DVec3::new(xs[3], ys[3], zs[3]),
+            DVec4::new(xs[0], ys[0], zs[0], ws[0]),
+            DVec4::new(xs[1], ys[1], zs[1], ws[1]),
+            DVec4::new(xs[2], ys[2], zs[2], ws[2]),
+            DVec4::new(xs[3], ys[3], zs[3], ws[3]),
         ]
     }
 }
 
 #[cfg(feature = "f64")]
-impl From<[DVec3; 4]> for DVec3x4 {
+impl From<[DVec4; 4]> for DVec4x4 {
     #[inline]
-    fn from(vecs: [DVec3; 4]) -> Self {
+    fn from(vecs: [DVec4; 4]) -> Self {
         Self {
             x: f64x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f64x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
             z: f64x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
+            w: f64x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
         }
     }
 }
 
 #[cfg(feature = "f32")]
-wide_vec3s!(
-    (Vec2x4, Vec3, Vec3x4, Vec4x4, BVec3x4) => (f32, f32x4, boolf32x4),
-    (Vec2x8, Vec3, Vec3x8, Vec4x8, BVec3x8) => (f32, f32x8, boolf32x8)
+wide_vec4s!(
+    (Vec3x4, Vec4, Vec4x4, BVec4x4) => (f32, f32x4, boolf32x4),
+    (Vec3x8, Vec4, Vec4x8, BVec4x8) => (f32, f32x8, boolf32x8)
 );
 
 #[cfg(feature = "f64")]
-wide_vec3s!(
-    (DVec2x2, DVec3, DVec3x2, DVec4x2, BDVec3x2) => (f64, f64x2, boolf64x2),
-    (DVec2x4, DVec3, DVec3x4, DVec4x4, BDVec3x4) => (f64, f64x4, boolf64x4)
+wide_vec4s!(
+    (DVec3x2, DVec4, DVec4x2, BDVec4x2) => (f64, f64x2, boolf64x2),
+    (DVec3x4, DVec4, DVec4x4, BDVec4x4) => (f64, f64x4, boolf64x4)
 );
