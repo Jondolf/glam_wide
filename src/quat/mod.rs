@@ -1,3 +1,4 @@
+#[expect(clippy::module_inception)]
 mod quat;
 
 #[cfg(feature = "f64")]

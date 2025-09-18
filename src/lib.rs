@@ -20,21 +20,6 @@ pub use vec::*;
 
 pub use wide::*;
 
-pub(crate) trait FloatExt {
-    const ZERO: Self;
-    const ONE: Self;
-}
-
-impl FloatExt for f32 {
-    const ZERO: Self = 0.0;
-    const ONE: Self = 1.0;
-}
-
-impl FloatExt for f64 {
-    const ZERO: Self = 0.0;
-    const ONE: Self = 1.0;
-}
-
 /// An extension trait for wide floating-point SIMD types.
 pub trait SimdFloatExt {
     /// Not a Number (NaN).
