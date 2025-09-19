@@ -4,6 +4,7 @@
 
 mod bool_wide;
 mod bvec;
+mod ivec;
 mod mat;
 mod quat;
 #[cfg(feature = "bevy_math")]
@@ -13,6 +14,7 @@ mod vec;
 
 pub use bool_wide::*;
 pub use bvec::*;
+pub use ivec::*;
 pub use mat::*;
 pub use quat::*;
 #[cfg(feature = "bevy_math")]
