@@ -65,18 +65,18 @@ std = ["glam/std", "glam_matrix_extras?/std", "bevy_math?/std"]
 wide = { version = "0.7", default-features = false }
 glam = { version = "0.30", default-features = false }
 glam_matrix_extras = { git = "https://github.com/Jondolf/glam_matrix_extras", optional = true, default-features = false }
-bevy_math = { version = "0.17.0-rc", optional = true, default-features = false }
+bevy_math = { version = "0.17", optional = true, default-features = false }
 approx = { version = "0.5", optional = true }
 
 # Reflection
-bevy_reflect = { version = "0.17.0-rc", optional = true }
+bevy_reflect = { version = "0.17", optional = true }
 serde = { version = "1.0", optional = true, features = ["serde_derive"] }
 
 [dev-dependencies]
 # Enable some features for testing.
 glam_wide = { path = "./", features = ["f32", "f64", "approx"] }
 glam_matrix_extras = { git = "https://github.com/Jondolf/glam_matrix_extras" }
-bevy_math = { version = "0.17.0-rc" }
+bevy_math = { version = "0.17" }
 
 [lints.clippy]
 alloc_instead_of_core = "warn"
