@@ -1,9 +1,9 @@
 use core::iter::Sum;
 use core::ops::*;
 #[cfg(feature = "f64")]
-use glam_matrix_extensions::SymmetricDMat3;
+use glam_matrix_extras::SymmetricDMat3;
 #[cfg(feature = "f32")]
-use glam_matrix_extensions::SymmetricMat3;
+use glam_matrix_extras::SymmetricMat3;
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};

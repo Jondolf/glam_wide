@@ -1,14 +1,14 @@
 mod mat2;
-#[cfg(feature = "glam_matrix_extensions")]
+#[cfg(feature = "glam_matrix_extras")]
 mod mat23;
 mod mat3;
-#[cfg(feature = "glam_matrix_extensions")]
+#[cfg(feature = "glam_matrix_extras")]
 mod mat32;
-#[cfg(feature = "glam_matrix_extensions")]
+#[cfg(feature = "glam_matrix_extras")]
 mod symmetric_mat2;
-#[cfg(feature = "glam_matrix_extensions")]
+#[cfg(feature = "glam_matrix_extras")]
 mod symmetric_mat3;
-#[cfg(feature = "glam_matrix_extensions")]
+#[cfg(feature = "glam_matrix_extras")]
 mod symmetric_mat6;
 
 #[cfg(feature = "f64")]
@@ -19,25 +19,25 @@ pub use mat2::{Mat2x4, Mat2x8};
 pub use mat3::{DMat3x2, DMat3x4};
 #[cfg(feature = "f32")]
 pub use mat3::{Mat3x4, Mat3x8};
-#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extras"))]
 pub use mat23::{DMat23x2, DMat23x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extras"))]
 pub use mat23::{Mat23x4, Mat23x8};
-#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extras"))]
 pub use mat32::{DMat32x2, DMat32x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extras"))]
 pub use mat32::{Mat32x4, Mat32x8};
-#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extras"))]
 pub use symmetric_mat2::{SymmetricDMat2x2, SymmetricDMat2x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extras"))]
 pub use symmetric_mat2::{SymmetricMat2x4, SymmetricMat2x8};
-#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extras"))]
 pub use symmetric_mat3::{SymmetricDMat3x2, SymmetricDMat3x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extras"))]
 pub use symmetric_mat3::{SymmetricMat3x4, SymmetricMat3x8};
-#[cfg(all(feature = "f64", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f64", feature = "glam_matrix_extras"))]
 pub use symmetric_mat6::{SymmetricDMat6x2, SymmetricDMat6x4};
-#[cfg(all(feature = "f32", feature = "glam_matrix_extensions"))]
+#[cfg(all(feature = "f32", feature = "glam_matrix_extras"))]
 pub use symmetric_mat6::{SymmetricMat6x4, SymmetricMat6x8};
 
 /// An error that can occur when converting matrices to other representations.

@@ -5,15 +5,15 @@ use glam::DMat3;
 #[cfg(feature = "f32")]
 use glam::Mat3;
 #[cfg(feature = "f64")]
-use glam_matrix_extensions::{SymmetricDMat3, SymmetricDMat6};
+use glam_matrix_extras::{SymmetricDMat3, SymmetricDMat6};
 #[cfg(feature = "f32")]
-use glam_matrix_extensions::{SymmetricMat3, SymmetricMat6};
+use glam_matrix_extras::{SymmetricMat3, SymmetricMat6};
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
 use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
-use crate::{DMat3x2, DMat3x4, SymmetricDMat3x2, SymmetricDMat3x4, DVec3x2, DVec3x4};
+use crate::{DMat3x2, DMat3x4, DVec3x2, DVec3x4, SymmetricDMat3x2, SymmetricDMat3x4};
 #[cfg(feature = "f32")]
 use crate::{Mat3x4, Mat3x8, SymmetricMat3x4, SymmetricMat3x8, Vec3x4, Vec3x8};
 

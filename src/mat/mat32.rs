@@ -1,9 +1,9 @@
 use core::iter::Sum;
 use core::ops::*;
 #[cfg(feature = "f64")]
-use glam_matrix_extensions::DMat32;
+use glam_matrix_extras::DMat32;
 #[cfg(feature = "f32")]
-use glam_matrix_extensions::Mat32;
+use glam_matrix_extras::Mat32;
 #[cfg(feature = "f32")]
 use wide::{f32x4, f32x8};
 #[cfg(feature = "f64")]
@@ -11,8 +11,8 @@ use wide::{f64x2, f64x4};
 
 #[cfg(feature = "f64")]
 use crate::{
-    DMat2x2, DMat2x4, DMat3x2, DMat3x4, DMat23x2, DMat23x4, SymmetricDMat2x2, SymmetricDMat2x4,
-    DVec2x2, DVec2x4, DVec3x2, DVec3x4,
+    DMat2x2, DMat2x4, DMat3x2, DMat3x4, DMat23x2, DMat23x4, DVec2x2, DVec2x4, DVec3x2, DVec3x4,
+    SymmetricDMat2x2, SymmetricDMat2x4,
 };
 #[cfg(feature = "f32")]
 use crate::{

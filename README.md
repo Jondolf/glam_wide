@@ -2,15 +2,15 @@
 
 Wide SIMD types for the [`glam`] ecosystem.
 
-This includes types for [`glam`], [`glam_matrix_extensions`], and [`bevy_math`].
+This includes types for [`glam`], [`glam_matrix_extras`], and [`bevy_math`].
 
 [`glam`]: https://docs.rs/glam/latest/glam/
-[`glam_matrix_extensions`]: https://github.com/Jondolf/glam_matrix_extensions
+[`glam_matrix_extras`]: https://github.com/Jondolf/glam_matrix_extras
 [`bevy_math`]: https://docs.rs/bevy_math/latest/bevy_math/
 
 ## What is SIMD?
 
-SIMD stands for [*Single Instruction, Multiple Data*](https://en.wikipedia.org/wiki/Single_instruction,_multiple_data).
+SIMD stands for [_Single Instruction, Multiple Data_](https://en.wikipedia.org/wiki/Single_instruction,_multiple_data).
 In short, it allows you to perform the same operation on multiple pieces of data at the same time,
 which can lead to significant performance improvements in numerical computations.
 
